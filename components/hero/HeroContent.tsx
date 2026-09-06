@@ -9,7 +9,7 @@ import {
   Briefcase,
   GraduationCap,
   Sparkle,
-  Compass,
+  TerminalWindow,
 } from "@phosphor-icons/react";
 import { ResumeModal } from "@/components/sections/ResumeModal";
 
@@ -19,17 +19,17 @@ export function HeroContent() {
   return (
     <>
       <div className="pointer-events-none relative z-20 mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col justify-between px-6 pb-10 pt-28">
-        {/* Top Duality Indicator Pill */}
+        {/* Top Duality Indicator Pill: Python + Data */}
         <div className="pointer-events-auto flex items-center">
           <div className="inline-flex items-center gap-3 rounded-full border border-line bg-bg-surface/95 px-4 py-2 shadow-lg shadow-black/30 backdrop-blur-md">
             <span className="flex items-center gap-1.5 font-mono text-xs font-medium text-structure">
               <span className="h-2 w-2 animate-pulse rounded-full bg-structure" />
-              Structure (Software)
+              Python (Software & ML)
             </span>
             <span className="text-xs text-text-muted">⇄</span>
             <span className="flex items-center gap-1.5 font-mono text-xs font-medium text-signal">
               <span className="h-2 w-2 animate-pulse rounded-full bg-signal" />
-              Signal (Data)
+              Data (Analytics & Insights)
             </span>
           </div>
         </div>
@@ -87,32 +87,31 @@ export function HeroContent() {
             </div>
           </div>
 
-          {/* Right Column: Interactive 3D Status Callout */}
+          {/* Right Column: Interactive 3D Python & Data Helix Badge */}
           <div className="pointer-events-none hidden flex-col items-end justify-center lg:col-span-5 lg:flex">
-            <div className="max-w-xs space-y-2.5 rounded-2xl border border-line/80 bg-bg-surface/80 p-4 font-mono text-xs text-text-muted shadow-2xl backdrop-blur-md">
+            <div className="max-w-xs space-y-2.5 rounded-2xl border border-line/80 bg-bg-surface/85 p-4 font-mono text-xs text-text-muted shadow-2xl backdrop-blur-md">
               <div className="flex items-center justify-between text-text-primary">
                 <span className="flex items-center gap-1.5 font-medium text-signal">
-                  <Compass
+                  <TerminalWindow
                     size={15}
                     weight="bold"
-                    className="animate-spin text-signal"
-                    style={{ animationDuration: "8s" }}
+                    className="text-structure"
                   />
-                  <span>Interactive 3D Core</span>
+                  <span>Pythonic Data Helix</span>
                 </span>
                 <span className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">
-                  CURSOR REACTIVE
+                  LIVE INTERACTION
                 </span>
               </div>
               <p className="text-[11px] leading-relaxed text-text-muted/90">
-                Move your cursor to dynamically tilt the magnetic gyro structure
-                and illuminate the organic signal orb with real-time specular
-                highlights.
+                Intertwining Python dual-serpent curves (Indigo = Code, Amber =
+                Data) over an interactive 3D statistical tensor surface. Move
+                mouse to tilt & ripple.
               </p>
               <div className="flex items-center justify-between border-t border-line/60 pt-2 text-[10px]">
-                <span className="text-structure">Inner: Signal Distortion</span>
+                <span className="text-structure">Strand: Python Logic</span>
                 <span className="text-text-muted">·</span>
-                <span className="text-purple-400">Outer: Wireframe Cage</span>
+                <span className="text-signal">Lattice: 3D Data Waves</span>
               </div>
             </div>
           </div>
