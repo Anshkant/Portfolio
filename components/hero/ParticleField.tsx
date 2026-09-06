@@ -23,13 +23,13 @@ const vertexShader = `
 
     float t = smoothstep(0.0, 1.0, uProgress);
 
-    // Subtle breathing wave
+    // Subtle gentle oscillation
     vec3 posA = position;
-    posA.y += sin(uTime * 1.2 + aRandom * 6.28) * 0.08;
-    posA.x += cos(uTime * 0.9 + aRandom * 3.14) * 0.05;
+    posA.y += sin(uTime * 1.0 + aRandom * 6.28) * 0.05;
+    posA.x += cos(uTime * 0.8 + aRandom * 3.14) * 0.04;
 
     vec3 posB = aTargetPosition;
-    posB.y += sin(uTime * 0.8 + aRandom * 4.0) * 0.03;
+    posB.y += sin(uTime * 0.7 + aRandom * 4.0) * 0.02;
 
     // Morph between Data Scatter and Structured Crystalline Graph
     vec3 mixedPos = mix(posA, posB, t);
@@ -38,8 +38,9 @@ const vertexShader = `
     vec4 modelViewPosition = modelViewMatrix * vec4(mixedPos, 1.0);
     gl_Position = projectionMatrix * modelViewPosition;
 
-    float baseSize = mix(aSize, aSize * 1.15, t);
-    gl_PointSize = baseSize * uPixelRatio * (38.0 / -modelViewPosition.z);
+    // Controlled point size to avoid blown-out overlapping blobs
+    float baseSize = mix(aSize, aSize * 1.1, t);
+    gl_PointSize = baseSize * uPixelRatio * (24.0 / -modelViewPosition.z);
   }
 `;
 
@@ -61,8 +62,8 @@ const fragmentShader = `
       discard;
     }
 
-    // Soft glow falloff
-    float alpha = smoothstep(0.5, 0.06, dist) * uOpacity;
+    // Smooth circular falloff with controlled maximum intensity
+    float alpha = smoothstep(0.5, 0.08, dist) * uOpacity * 0.85;
 
     // Tokens:
     // Signal (Data, Amber): #F2B441 -> vec3(0.949, 0.706, 0.255)
@@ -81,9 +82,9 @@ const fragmentShader = `
       baseColor = mix(bridgeColor, structureColor, (t - 0.5) * 2.0);
     }
 
-    // Specular core dot
-    float core = smoothstep(0.18, 0.0, dist);
-    vec3 finalColor = mix(baseColor, vec3(1.0, 1.0, 1.0), core * 0.45);
+    // Controlled center dot highlight
+    float core = smoothstep(0.2, 0.0, dist);
+    vec3 finalColor = mix(baseColor, vec3(1.0, 1.0, 1.0), core * 0.35);
 
     gl_FragColor = vec4(finalColor, alpha);
   }
@@ -106,20 +107,17 @@ export function ParticleField({
   scrollProgress = 0,
   reducedMotion = false,
 }: ParticleFieldProps) {
-  const { viewport } = useThree();
   const pointsRef = useRef<THREE.Points>(null);
   const materialRef = useRef<THREE.ShaderMaterial>(null);
 
-  // Adaptive particle count based on screen size
+  const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
   const particleCount = useMemo(() => {
-    if (typeof window === "undefined") return 4500;
-    const isMobile = window.innerWidth < 768;
-    return isMobile ? 2200 : 4800;
-  }, []);
+    return isMobile ? 1800 : 3600;
+  }, [isMobile]);
 
-  // Generate the two topological states:
-  // State A: Data Scatter / Probability Distributions / Density Waves
-  // State B: Structured Graph / Git-Commit Tree / Polyhedron Matrix
+  // Center offset: shift to the right on desktop so it frames the content rather than obstructing text!
+  const xCenterOffset = isMobile ? 0.0 : 1.4;
+
   const { sourcePositions, targetPositions, randoms, sizes } = useMemo(() => {
     const source = new Float32Array(particleCount * 3);
     const target = new Float32Array(particleCount * 3);
@@ -131,38 +129,38 @@ export function ParticleField({
     for (let i = 0; i < particleCount; i++) {
       const i3 = i * 3;
       rnd[i] = Math.random();
-      sz[i] = 1.2 + Math.random() * 2.2;
+      sz[i] = 1.0 + Math.random() * 1.8;
 
       // STATE A: DATA / SIGNAL (Scattered distributions, density curves, trends)
-      const u = Math.random();
-      const v = Math.random();
-      const thetaA = u * 2.0 * Math.PI;
-      const phiA = Math.acos(2.0 * v - 1.0);
+      // Disperse more widely to avoid high-density bright blobs in a single spot
+      const xA = (Math.random() - 0.5) * 4.2 + xCenterOffset;
+      const yA =
+        Math.sin((xA - xCenterOffset) * 1.8) * 0.9 +
+        (Math.random() - 0.5) * 2.0;
+      const zA = (Math.random() - 0.5) * 2.4;
 
-      const xA = (Math.random() - 0.5) * 5.5;
-      const yA = Math.sin(xA * 1.5) * 0.8 + (Math.random() - 0.5) * 1.8;
-      const zA = (Math.random() - 0.5) * 3.2;
+      source[i3] = xA;
+      source[i3 + 1] = yA;
+      source[i3 + 2] = zA;
 
-      source[i3] = xA * 0.85;
-      source[i3 + 1] = yA * 0.85;
-      source[i3 + 2] = zA * 0.7;
-
-      // STATE B: STRUCTURE / CODE (Polyhedral graph, ordered crystalline nodes)
+      // STATE B: STRUCTURE / CODE (Crystalline polyhedral graph)
       const idx = i;
       const phiB = Math.acos(1 - (2 * (idx + 0.5)) / particleCount);
       const thetaB = (2 * Math.PI * idx) / goldenRatio;
 
-      const shellLayer = (i % 4) + 1;
-      const shellRadius = 1.1 + shellLayer * 0.45;
+      const shellLayer = (i % 3) + 1;
+      const shellRadius = 0.9 + shellLayer * 0.45;
 
-      const xB = shellRadius * Math.sin(phiB) * Math.cos(thetaB);
+      const xB =
+        shellRadius * Math.sin(phiB) * Math.cos(thetaB) + xCenterOffset;
       const yB = shellRadius * Math.sin(phiB) * Math.sin(thetaB);
       const zB = shellRadius * Math.cos(phiB);
 
-      if (i % 5 === 0) {
-        target[i3] = Math.round(xB * 2.2) * 0.45;
-        target[i3 + 1] = Math.round(yB * 2.2) * 0.45;
-        target[i3 + 2] = Math.round(zB * 2.2) * 0.45;
+      if (i % 6 === 0) {
+        target[i3] =
+          Math.round((xB - xCenterOffset) * 2.0) * 0.48 + xCenterOffset;
+        target[i3 + 1] = Math.round(yB * 2.0) * 0.48;
+        target[i3 + 2] = Math.round(zB * 2.0) * 0.48;
       } else {
         target[i3] = xB;
         target[i3 + 1] = yB;
@@ -176,9 +174,8 @@ export function ParticleField({
       randoms: rnd,
       sizes: sz,
     };
-  }, [particleCount]);
+  }, [particleCount, xCenterOffset]);
 
-  // Uniforms definition
   const uniforms = useMemo<ParticleUniforms>(
     () => ({
       uProgress: { value: 0.0 },
@@ -196,34 +193,29 @@ export function ParticleField({
     }
   }, []);
 
-  // Frame loop: smooth interpolation between states & mouse parallax
   useFrame((state, delta) => {
     if (!materialRef.current) return;
     const u = materialRef.current.uniforms as ParticleUniforms;
 
     if (reducedMotion) {
       u.uProgress.value = 1.0;
-      u.uOpacity.value = 0.85;
+      u.uOpacity.value = 0.75;
       return;
     }
 
-    // Update time
     u.uTime.value += delta;
 
-    // Fade in on load
-    if (u.uOpacity.value < 0.95) {
+    if (u.uOpacity.value < 0.85) {
       u.uOpacity.value = THREE.MathUtils.lerp(
         u.uOpacity.value,
-        0.95,
-        delta * 2.5
+        0.85,
+        delta * 2.0
       );
     }
 
-    // Scroll drives progress between Signal (0.0) and Structure (1.0)
-    // Plus a gentle continuous breathing oscillation
-    const breathingOffset = 0.18 * Math.sin(state.clock.elapsedTime * 0.6);
+    const breathingOffset = 0.15 * Math.sin(state.clock.elapsedTime * 0.5);
     const targetProgress = THREE.MathUtils.clamp(
-      scrollProgress * 1.5 + 0.35 + breathingOffset,
+      scrollProgress * 1.4 + 0.35 + breathingOffset,
       0.0,
       1.0
     );
@@ -231,14 +223,13 @@ export function ParticleField({
     u.uProgress.value = THREE.MathUtils.lerp(
       u.uProgress.value,
       targetProgress,
-      delta * 3.0
+      delta * 2.5
     );
 
-    // Subtle mouse parallax on camera/group
     if (pointsRef.current) {
-      const targetRotationX = state.pointer.y * 0.18;
+      const targetRotationX = state.pointer.y * 0.12;
       const targetRotationY =
-        state.pointer.x * 0.28 + state.clock.elapsedTime * 0.035;
+        state.pointer.x * 0.2 + state.clock.elapsedTime * 0.025;
 
       pointsRef.current.rotation.x = THREE.MathUtils.lerp(
         pointsRef.current.rotation.x,
@@ -288,7 +279,7 @@ export function ParticleField({
         uniforms={uniforms}
         transparent
         depthWrite={false}
-        blending={THREE.AdditiveBlending}
+        blending={THREE.NormalBlending}
       />
     </points>
   );

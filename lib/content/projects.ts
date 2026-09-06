@@ -9,8 +9,9 @@ export interface Project {
   accentColor: string;
   technologies: string[];
   repoUrl: string;
-  demoUrl?: string;
+  liveUrl?: string;
   isFlagship?: boolean;
+  publication?: string;
   metrics?: Array<{
     label: string;
     value: string;
@@ -23,28 +24,92 @@ export const projectsData: Project[] = [
     id: "vanrakshak-ai",
     title: "VanRakshak AI",
     tagline:
-      "Real-time forest surveillance & multi-camera computer vision monitoring",
+      "Wildlife Sanctuary Monitoring System — Published Research (IJRASET79908)",
     description:
-      "AI-powered computer vision system for real-time forest monitoring and threat detection, engineered with a multi-camera pipeline and robust object tracking.",
+      "End-to-end AI pipeline achieving 92%+ detection accuracy on live surveillance feeds, cutting human-animal conflict response time to under 60 seconds via automated Telegram alerts.",
     longDescription:
-      "Engineered as a mission-critical AI system for environmental surveillance. VanRakshak AI fuses deep learning object detection with real-time video stream processing and tracking across multi-camera feeds to monitor wildlife movements, detect forest intrusions, and safeguard sensitive reserves.",
+      "Engineered as a mission-critical AI system for environmental surveillance. VanRakshak AI fuses deep learning object detection with real-time video stream processing and tracking across multi-camera feeds. Published in IJRASET (Paper ID: IJRASET79908).",
     lean: "bridge",
     leanLabel: "Bridge (AI/ML)",
     accentColor: "#A78BFA",
-    technologies: ["Python", "YOLOv8", "OpenCV", "DeepSORT", "FastAPI"],
+    technologies: [
+      "Python",
+      "YOLOv8",
+      "DeepSORT",
+      "OpenCV",
+      "Telegram Bot API",
+      "FastAPI",
+    ],
     repoUrl: "https://github.com/Anshkant/Vanrakshak-AI",
     isFlagship: true,
+    publication: "IJRASET79908",
     metrics: [
       { label: "Detection Accuracy", value: "92%+" },
-      { label: "Surveillance Pipeline", value: "Multi-Camera" },
+      { label: "Alert Response Time", value: "< 60s" },
+      { label: "Research Paper", value: "IJRASET79908" },
       { label: "Tracking Framework", value: "DeepSORT + YOLOv8" },
-      { label: "Research Status", value: "Published Research" },
     ],
     architectureHighlights: [
       "Real-time object detection and classification using custom-trained YOLOv8 weights",
       "Persistent identity association across frames via DeepSORT tracking algorithms",
-      "Asynchronous video ingestion pipeline built on FastAPI and optimized OpenCV buffers",
-      "Automated threat boundary alerting and incident logging architecture",
+      "Automated instant Telegram alerts cutting emergency response to under 60 seconds",
+      "Multi-camera video ingestion pipeline with asynchronous frame buffering",
+    ],
+  },
+  {
+    id: "critindia",
+    title: "CritIndia — SAP Consulting Platform",
+    tagline: "High-performance enterprise consulting website with Next.js SSR",
+    description:
+      "Full-stack website engineered with Next.js Server-Side Rendering achieving sub-2s page load speeds, serving 1,000+ monthly B2B enterprise visitors.",
+    longDescription:
+      "Built during internship at Atorix IT Solutions. Delivers modern responsive interfaces, optimized search engine visibility, structured component hierarchies, and sub-2s load times for enterprise SAP consultants.",
+    lean: "structure",
+    leanLabel: "Structure (Software)",
+    accentColor: "#5C7CFA",
+    technologies: [
+      "Next.js",
+      "React.js",
+      "Tailwind CSS",
+      "SSR",
+      "SEO Optimization",
+    ],
+    repoUrl: "https://github.com/Anshkant",
+    liveUrl: "https://critindia.com",
+    metrics: [
+      { label: "Page Load Speed", value: "< 2.0s" },
+      { label: "Monthly B2B Traffic", value: "1,000+" },
+      { label: "Architecture", value: "Next.js SSR" },
+    ],
+    architectureHighlights: [
+      "Server-Side Rendered pages ensuring immediate first-contentful paint under 2 seconds",
+      "Responsive, mobile-optimized component architecture built on Tailwind CSS",
+      "Enterprise lead generation flows and client portal touchpoints",
+    ],
+  },
+  {
+    id: "connecting-dots-erp",
+    title: "ConnectingDots ERP",
+    tagline: "Training Institute Portal & Workflow Management System",
+    description:
+      "Full-stack ERP backend handling 5,000+ monthly student visits across diverse course verticals, with MongoDB query indexing and Express middleware.",
+    longDescription:
+      "Shipped during internship at Atorix IT Solutions. Handles student lifecycle, course registrations, role-based auth, and automated scheduling with optimized database performance.",
+    lean: "structure",
+    leanLabel: "Structure (Software)",
+    accentColor: "#5C7CFA",
+    technologies: ["Node.js", "Express.js", "MongoDB", "REST APIs", "Auth0"],
+    repoUrl: "https://github.com/Anshkant",
+    liveUrl: "https://connectingdotserp.com",
+    metrics: [
+      { label: "Monthly Active Visits", value: "5,000+" },
+      { label: "Query Optimization", value: "35% Faster" },
+      { label: "Database Layer", value: "MongoDB Indexed" },
+    ],
+    architectureHighlights: [
+      "Optimized MongoDB indexing cutting query latency by ~35%",
+      "Modular Express.js middleware handling role authorization and secure session tokens",
+      "Robust RESTful endpoints serving high student traffic across course verticals",
     ],
   },
   {
@@ -55,11 +120,17 @@ export const projectsData: Project[] = [
     description:
       "Data-driven KPI monitoring application for tracking business performance with real-time operational metrics, trend detection, and anomaly alerts.",
     longDescription:
-      "Translates complex corporate data streams into actionable operational intelligence. AI KPI Monitor runs automated data extraction, statistical trend analysis, and live KPI dashboards to empower stakeholders to pinpoint operational bottlenecks before they escalate.",
+      "Translates complex corporate data streams into actionable operational intelligence. AI KPI Monitor runs automated data extraction, statistical trend analysis, and live KPI dashboards.",
     lean: "signal",
     leanLabel: "Signal (Data)",
     accentColor: "#F2B441",
-    technologies: ["Python", "Data Analytics", "Dashboard", "APIs", "Pandas"],
+    technologies: [
+      "Python",
+      "Pandas",
+      "Data Analytics",
+      "Dashboards",
+      "REST APIs",
+    ],
     repoUrl: "https://github.com/Anshkant/AI-KPI-Monitor",
     metrics: [
       { label: "Core Metric Tracking", value: "Real-Time" },
@@ -73,38 +144,6 @@ export const projectsData: Project[] = [
     ],
   },
   {
-    id: "connecting-dots-erp",
-    title: "Connecting Dots ERP",
-    tagline:
-      "Enterprise workflow management and full-stack operational architecture",
-    description:
-      "Full-stack ERP web application architected for business operations, workflow automation, inventory tracking, and enterprise team coordination.",
-    longDescription:
-      "Built with a focus on data consistency and high user concurrency. Connecting Dots ERP delivers modular business management, responsive role-based dashboards, and structured MongoDB schema models wrapped in performant RESTful API routes.",
-    lean: "structure",
-    leanLabel: "Structure (Software)",
-    accentColor: "#5C7CFA",
-    technologies: [
-      "Next.js",
-      "React.js",
-      "Node.js",
-      "MongoDB",
-      "REST APIs",
-      "Tailwind CSS",
-    ],
-    repoUrl: "https://github.com/Anshkant",
-    metrics: [
-      { label: "Architecture", value: "Full-Stack Web" },
-      { label: "Database Layer", value: "MongoDB Schemas" },
-      { label: "Client Engine", value: "Next.js + React" },
-    ],
-    architectureHighlights: [
-      "Component-driven responsive interfaces with optimized server-side rendering",
-      "Secure REST API endpoints with granular role authorization and request validation",
-      "Relational document schemas designed for enterprise operational flows",
-    ],
-  },
-  {
     id: "patient-readmission-analysis",
     title: "Patient Readmission & Healthcare Analysis",
     tagline:
@@ -112,7 +151,7 @@ export const projectsData: Project[] = [
     description:
       "Comprehensive data analytics study uncovering critical clinical patterns, patient demographics, and risk factors that correlate with hospital readmissions.",
     longDescription:
-      "Applies exploratory data analysis and statistical evaluation to complex healthcare records. Identifies high-risk patient segments, analyzes diagnostic correlations, and provides data-backed recommendations to reduce preventable hospital returns.",
+      "Applies exploratory data analysis and statistical evaluation to complex healthcare records to identify high-risk patient segments and reduce preventable hospital returns.",
     lean: "signal",
     leanLabel: "Signal (Data)",
     accentColor: "#F2B441",

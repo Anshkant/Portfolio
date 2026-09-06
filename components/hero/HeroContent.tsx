@@ -1,93 +1,136 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { profileData } from "@/lib/content/profile";
 import {
   ArrowSquareOut,
   Code,
-  ChartBar,
-  TerminalWindow,
+  FileText,
+  Briefcase,
+  GraduationCap,
+  Sparkle,
 } from "@phosphor-icons/react";
+import { ResumeModal } from "@/components/sections/ResumeModal";
 
 export function HeroContent() {
+  const [resumeOpen, setResumeOpen] = useState(false);
+
   return (
-    <div className="relative z-10 mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col justify-between px-6 pb-12 pt-28">
-      {/* Top duality indicator pill */}
-      <div className="flex items-center">
-        <div className="inline-flex items-center gap-3 rounded-full border border-line bg-bg-surface/80 px-3.5 py-1.5 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur-md">
-          <span className="flex items-center gap-1.5 font-mono text-xs text-structure">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-structure" />
-            Structure (Software)
-          </span>
-          <span className="text-xs text-text-muted">⇄</span>
-          <span className="flex items-center gap-1.5 font-mono text-xs text-signal">
-            <span className="h-2 w-2 animate-pulse rounded-full bg-signal" />
-            Signal (Data)
-          </span>
-        </div>
-      </div>
-
-      {/* Main Hero Stack */}
-      <div className="my-auto max-w-3xl py-8">
-        <h1 className="mb-6 font-display text-4xl font-medium leading-[1.08] tracking-tight text-text-primary sm:text-5xl md:text-6xl">
-          I turn scattered data into decisions, and decisions into software.
-        </h1>
-
-        <p className="mb-8 max-w-[62ch] font-body text-base leading-relaxed text-text-muted sm:text-lg">
-          {profileData.tagline} B.Tech CSE in Nagpur, India, engineering
-          production-grade web systems, data pipelines, and computer vision
-          models.
-        </p>
-
-        {/* Dual Actions with Button-in-Button Trailing Icons */}
-        <div className="flex flex-wrap items-center gap-4">
-          <a
-            href="#projects"
-            className="group inline-flex items-center gap-3 rounded-full bg-text-primary px-6 py-3.5 text-sm font-medium text-bg-primary shadow-lg shadow-white/5 transition-all duration-300 hover:bg-white active:scale-[0.98]"
-          >
-            <span>Explore Projects</span>
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-bg-primary/10 transition-transform duration-300 group-hover:translate-x-0.5">
-              <Code size={14} weight="bold" className="text-bg-primary" />
+    <>
+      <div className="relative z-20 mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col justify-between px-6 pb-10 pt-28">
+        {/* Top Duality Indicator Pill */}
+        <div className="flex items-center">
+          <div className="inline-flex items-center gap-3 rounded-full border border-line bg-bg-surface/95 px-4 py-2 shadow-lg shadow-black/30 backdrop-blur-md">
+            <span className="flex items-center gap-1.5 font-mono text-xs font-medium text-structure">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-structure" />
+              Structure (Software)
             </span>
-          </a>
-
-          <a
-            href={profileData.links.linkedin}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="group inline-flex items-center gap-3 rounded-full border border-line bg-bg-surface/80 px-6 py-3.5 text-sm font-medium text-text-primary transition-all duration-300 hover:border-line-highlight hover:bg-bg-elevated active:scale-[0.98]"
-          >
-            <span>Connect on LinkedIn</span>
-            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-white/5 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5">
-              <ArrowSquareOut
-                size={14}
-                weight="bold"
-                className="text-text-muted group-hover:text-text-primary"
-              />
+            <span className="text-xs text-text-muted">⇄</span>
+            <span className="flex items-center gap-1.5 font-mono text-xs font-medium text-signal">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-signal" />
+              Signal (Data)
             </span>
-          </a>
+          </div>
+        </div>
+
+        {/* Main Hero Grid: Split Screen for Maximum Readability */}
+        <div className="my-auto grid grid-cols-1 items-center gap-8 py-6 lg:grid-cols-12">
+          {/* Left Column: High-Contrast Foreground Text (Guaranteed Readability) */}
+          <div className="max-w-2xl space-y-6 lg:col-span-8">
+            <h1 className="font-display text-4xl font-bold leading-[1.08] tracking-tight text-text-primary drop-shadow-md sm:text-5xl lg:text-6xl">
+              I turn scattered data into decisions, and decisions into software.
+            </h1>
+
+            <p className="max-w-[58ch] font-body text-base leading-relaxed text-text-muted sm:text-lg">
+              Software Engineer & Data Analyst with 6 months on-site internship
+              experience at Atorix IT Solutions, Pune, and a peer-reviewed AI
+              research publication (IJRASET79908).
+            </p>
+
+            {/* Action Buttons: Explore Projects, View Resume, LinkedIn */}
+            <div className="flex flex-wrap items-center gap-3.5 pt-2">
+              <a
+                href="#projects"
+                className="active:scale-98 group inline-flex items-center gap-3 rounded-full bg-text-primary px-6 py-3.5 text-sm font-medium text-bg-primary shadow-xl shadow-white/5 transition-all duration-300 hover:bg-white"
+              >
+                <span>Explore Projects</span>
+                <span className="flex h-6 w-6 items-center justify-center rounded-full bg-bg-primary/10 transition-transform duration-300 group-hover:translate-x-0.5">
+                  <Code size={14} weight="bold" className="text-bg-primary" />
+                </span>
+              </a>
+
+              {/* View Resume Button */}
+              <button
+                type="button"
+                onClick={() => setResumeOpen(true)}
+                className="active:scale-98 group inline-flex items-center gap-2.5 rounded-full border border-structure/40 bg-structure/15 px-6 py-3.5 text-sm font-medium text-structure shadow-lg shadow-structure/10 transition-all duration-300 hover:border-structure hover:bg-structure/25"
+              >
+                <FileText size={16} weight="bold" />
+                <span>View Resume</span>
+              </button>
+
+              {/* LinkedIn */}
+              <a
+                href={profileData.links.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="active:scale-98 group inline-flex items-center gap-2 rounded-full border border-line bg-bg-surface/90 px-5 py-3.5 font-mono text-xs text-text-primary transition-all duration-300 hover:border-line-highlight hover:bg-bg-elevated"
+              >
+                <span>LinkedIn</span>
+                <ArrowSquareOut
+                  size={13}
+                  weight="bold"
+                  className="text-text-muted transition-colors group-hover:text-text-primary"
+                />
+              </a>
+            </div>
+          </div>
+
+          {/* Right Column: 3D Scene Indicator Badge (Visible on desktop) */}
+          <div className="pointer-events-none hidden flex-col items-end justify-center lg:col-span-4 lg:flex">
+            <div className="max-w-xs space-y-2 rounded-2xl border border-line/80 bg-bg-surface/80 p-4 font-mono text-xs text-text-muted shadow-2xl backdrop-blur-md">
+              <div className="flex items-center justify-between text-text-primary">
+                <span className="flex items-center gap-1.5 font-medium text-signal">
+                  <Sparkle size={14} weight="bold" />
+                  <span>3D Morph Engine</span>
+                </span>
+                <span className="rounded border border-line bg-bg-primary px-1.5 py-0.5 text-[10px]">
+                  ACTIVE
+                </span>
+              </div>
+              <p className="text-[11px] leading-relaxed text-text-muted/90">
+                Interactive GPU particle field. Move cursor or scroll down to
+                morph between raw data points and structured code geometry.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Verified Telemetry Strip */}
+        <div className="grid grid-cols-2 gap-3 border-t border-line/60 pt-6 sm:grid-cols-4">
+          <div className="flex items-center gap-2 font-mono text-xs text-text-muted">
+            <Briefcase size={15} className="shrink-0 text-structure" />
+            <span className="truncate">Atorix IT Solutions (Intern)</span>
+          </div>
+          <div className="flex items-center gap-2 font-mono text-xs text-text-muted">
+            <GraduationCap size={15} className="shrink-0 text-signal" />
+            <span>CGPA: 7.98 / 10.0</span>
+          </div>
+          <div className="flex items-center gap-2 font-mono text-xs text-text-muted">
+            <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
+            <span className="truncate">VanRakshak AI (92%+)</span>
+          </div>
+          <div className="flex items-center gap-2 font-mono text-xs text-text-muted">
+            <span className="text-text-muted/60">Research:</span>
+            <span className="truncate font-medium text-text-primary">
+              IJRASET79908
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Bottom Telemetry Strip */}
-      <div className="grid grid-cols-2 gap-3 border-t border-line/60 pt-6 md:grid-cols-4">
-        <div className="flex items-center gap-2 font-mono text-xs text-text-muted">
-          <TerminalWindow size={15} className="text-structure" />
-          <span>Dev Track: Next.js · Node.js</span>
-        </div>
-        <div className="flex items-center gap-2 font-mono text-xs text-text-muted">
-          <ChartBar size={15} className="text-signal" />
-          <span>Data Track: Python · SQL · Power BI</span>
-        </div>
-        <div className="flex items-center gap-2 font-mono text-xs text-text-muted">
-          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          <span>Flagship: VanRakshak AI (92%+)</span>
-        </div>
-        <div className="flex items-center gap-2 font-mono text-xs text-text-muted">
-          <span className="text-text-muted/60">Location:</span>
-          <span className="text-text-primary">Nagpur, India</span>
-        </div>
-      </div>
-    </div>
+      {/* Interactive Resume Modal */}
+      <ResumeModal isOpen={resumeOpen} onClose={() => setResumeOpen(false)} />
+    </>
   );
 }
