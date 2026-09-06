@@ -9,6 +9,7 @@ import {
   Briefcase,
   GraduationCap,
   Sparkle,
+  Compass,
 } from "@phosphor-icons/react";
 import { ResumeModal } from "@/components/sections/ResumeModal";
 
@@ -17,9 +18,9 @@ export function HeroContent() {
 
   return (
     <>
-      <div className="relative z-20 mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col justify-between px-6 pb-10 pt-28">
+      <div className="pointer-events-none relative z-20 mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col justify-between px-6 pb-10 pt-28">
         {/* Top Duality Indicator Pill */}
-        <div className="flex items-center">
+        <div className="pointer-events-auto flex items-center">
           <div className="inline-flex items-center gap-3 rounded-full border border-line bg-bg-surface/95 px-4 py-2 shadow-lg shadow-black/30 backdrop-blur-md">
             <span className="flex items-center gap-1.5 font-mono text-xs font-medium text-structure">
               <span className="h-2 w-2 animate-pulse rounded-full bg-structure" />
@@ -33,15 +34,15 @@ export function HeroContent() {
           </div>
         </div>
 
-        {/* Main Hero Grid: Split Screen for Maximum Readability */}
+        {/* Main Hero Grid */}
         <div className="my-auto grid grid-cols-1 items-center gap-8 py-6 lg:grid-cols-12">
           {/* Left Column: High-Contrast Foreground Text (Guaranteed Readability) */}
-          <div className="max-w-2xl space-y-6 lg:col-span-8">
+          <div className="pointer-events-auto max-w-2xl space-y-6 lg:col-span-7">
             <h1 className="font-display text-4xl font-bold leading-[1.08] tracking-tight text-text-primary drop-shadow-md sm:text-5xl lg:text-6xl">
               I turn scattered data into decisions, and decisions into software.
             </h1>
 
-            <p className="max-w-[58ch] font-body text-base leading-relaxed text-text-muted sm:text-lg">
+            <p className="max-w-[56ch] font-body text-base leading-relaxed text-text-muted sm:text-lg">
               Software Engineer & Data Analyst with 6 months on-site internship
               experience at Atorix IT Solutions, Pune, and a peer-reviewed AI
               research publication (IJRASET79908).
@@ -86,28 +87,39 @@ export function HeroContent() {
             </div>
           </div>
 
-          {/* Right Column: 3D Scene Indicator Badge (Visible on desktop) */}
-          <div className="pointer-events-none hidden flex-col items-end justify-center lg:col-span-4 lg:flex">
-            <div className="max-w-xs space-y-2 rounded-2xl border border-line/80 bg-bg-surface/80 p-4 font-mono text-xs text-text-muted shadow-2xl backdrop-blur-md">
+          {/* Right Column: Interactive 3D Status Callout */}
+          <div className="pointer-events-none hidden flex-col items-end justify-center lg:col-span-5 lg:flex">
+            <div className="max-w-xs space-y-2.5 rounded-2xl border border-line/80 bg-bg-surface/80 p-4 font-mono text-xs text-text-muted shadow-2xl backdrop-blur-md">
               <div className="flex items-center justify-between text-text-primary">
                 <span className="flex items-center gap-1.5 font-medium text-signal">
-                  <Sparkle size={14} weight="bold" />
-                  <span>3D Morph Engine</span>
+                  <Compass
+                    size={15}
+                    weight="bold"
+                    className="animate-spin text-signal"
+                    style={{ animationDuration: "8s" }}
+                  />
+                  <span>Interactive 3D Core</span>
                 </span>
-                <span className="rounded border border-line bg-bg-primary px-1.5 py-0.5 text-[10px]">
-                  ACTIVE
+                <span className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">
+                  CURSOR REACTIVE
                 </span>
               </div>
               <p className="text-[11px] leading-relaxed text-text-muted/90">
-                Interactive GPU particle field. Move cursor or scroll down to
-                morph between raw data points and structured code geometry.
+                Move your cursor to dynamically tilt the magnetic gyro structure
+                and illuminate the organic signal orb with real-time specular
+                highlights.
               </p>
+              <div className="flex items-center justify-between border-t border-line/60 pt-2 text-[10px]">
+                <span className="text-structure">Inner: Signal Distortion</span>
+                <span className="text-text-muted">·</span>
+                <span className="text-purple-400">Outer: Wireframe Cage</span>
+              </div>
             </div>
           </div>
         </div>
 
         {/* Bottom Verified Telemetry Strip */}
-        <div className="grid grid-cols-2 gap-3 border-t border-line/60 pt-6 sm:grid-cols-4">
+        <div className="pointer-events-auto grid grid-cols-2 gap-3 border-t border-line/60 pt-6 sm:grid-cols-4">
           <div className="flex items-center gap-2 font-mono text-xs text-text-muted">
             <Briefcase size={15} className="shrink-0 text-structure" />
             <span className="truncate">Atorix IT Solutions (Intern)</span>
