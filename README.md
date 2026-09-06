@@ -1,8 +1,7 @@
 # Anshkant Malviya — Portfolio Website
+
 <p align="center">
-  <a href="https://portfolio-rho-gules-40tdq4n6wl.vercel.app/">
-    <img src="https://img.shields.io/badge/Live_Demo-portfolio--rho--gules--40tdq4n6wl.vercel.app-5C7CFA?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" />
-  </a>
+  <img src="https://img.shields.io/badge/Live_Demo-portfolio--rho--gules--40tdq4n6wl.vercel.app-5C7CFA?style=for-the-badge&logo=vercel&logoColor=white" alt="Live Demo" />
   <img src="https://img.shields.io/badge/Next.js_14-000000?style=for-the-badge&logo=next.js&logoColor=white" alt="Next.js 14" />
   <img src="https://img.shields.io/badge/Three.js_/_R3F-049EF4?style=for-the-badge&logo=three.js&logoColor=white" alt="Three.js" />
   <img src="https://img.shields.io/badge/TypeScript_Strict-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript" />
@@ -32,15 +31,15 @@ An interactive, dual-track portfolio website for **Anshkant Malviya** (Software 
 
 The visual language contrasts two complementary disciplines:
 
-| Token | Hex | Discipline / Purpose |
-|---|---|---|
-| `--bg-primary` | `#0B0E14` | Deep graphite-navy base background |
-| `--bg-surface` | `#12161F` | Elevated console panels and cards |
-| `--structure` | `#5C7CFA` | **Code / Software Systems** — Cool electric indigo |
-| `--signal` | `#F2B441` | **Data / Analytics** — Warm amber-gold |
-| `--bridge` | `#A78BFA` | **Applied AI / Computer Vision** — Connective violet |
-| `--text-primary` | `#EDEFF4` | High-contrast headlines & text |
-| `--line` | `#232838` | Hairline grid dividers |
+| Token            | Hex       | Discipline / Purpose                                 |
+| ---------------- | --------- | ---------------------------------------------------- |
+| `--bg-primary`   | `#0B0E14` | Deep graphite-navy base background                   |
+| `--bg-surface`   | `#12161F` | Elevated console panels and cards                    |
+| `--structure`    | `#5C7CFA` | **Code / Software Systems** — Cool electric indigo   |
+| `--signal`       | `#F2B441` | **Data / Analytics** — Warm amber-gold               |
+| `--bridge`       | `#A78BFA` | **Applied AI / Computer Vision** — Connective violet |
+| `--text-primary` | `#EDEFF4` | High-contrast headlines & text                       |
+| `--line`         | `#232838` | Hairline grid dividers                               |
 
 ---
 
@@ -59,25 +58,30 @@ The visual language contrasts two complementary disciplines:
 ## 🚀 Featured Projects
 
 ### 1. [VanRakshak AI](https://github.com/Anshkant/Vanrakshak-AI) — Wildlife Sanctuary Monitoring System
+
 - **Highlights**: **92%+ Detection Accuracy** · **Published Research (IJRASET79908)** · **Sub-60s Telegram Alerts**
 - Multi-camera surveillance pipeline integrating real-time YOLOv8 object detection with DeepSORT tracking algorithms to mitigate human-animal conflict in wildlife reserves.
 - **Tech**: Python, YOLOv8, DeepSORT, OpenCV, FastAPI, Telegram Bot API.
 
 ### 2. [CritIndia](https://github.com/Anshkant) — SAP Consulting Platform
+
 - **Highlights**: **Sub-2.0s Page Loads** · **1,000+ Monthly B2B Visitors** · **Enterprise SSR**
 - Full-stack consulting website built during internship at Atorix IT Solutions with optimized search engine visibility and responsive component architecture.
 - **Tech**: Next.js, React.js, Tailwind CSS, SSR.
 
 ### 3. [ConnectingDots ERP](https://github.com/Anshkant) — Training Institute Portal
+
 - **Highlights**: **5,000+ Monthly Active Visits** · **35% Faster Query Speed** · **MongoDB Indexed**
 - Full-stack workflow and student lifecycle management system with optimized MongoDB query indexing and Express.js middleware.
 - **Tech**: Node.js, Express.js, MongoDB, REST APIs, Auth0.
 
 ### 4. [AI KPI Monitor](https://github.com/Anshkant/AI-KPI-Monitor) — Operational Intelligence
+
 - Real-time business performance monitoring tracking operational time-series metrics with automated statistical threshold alerts.
 - **Tech**: Python, Pandas, REST APIs, Dashboards.
 
 ### 5. [Patient Readmission & Healthcare Analysis](https://github.com/Anshkant/Patient-Readmission-and-Healthcare-Analysis)
+
 - Multivariate statistical and exploratory data analysis identifying clinical risk factors and diagnostic correlations in hospital readmissions.
 - **Tech**: Python, Pandas, NumPy, Seaborn, Matplotlib, EDA.
 
@@ -101,3 +105,21 @@ npm run dev
 
 # 5. Run strict verification (TypeScript & Next.js production build)
 npm run verify
+```
+
+---
+
+## 📬 Connect with Anshkant
+
+- **Portfolio**: [portfolio-rho-gules-40tdq4n6wl.vercel.app](https://portfolio-rho-gules-40tdq4n6wl.vercel.app/)
+- **LinkedIn**: [linkedin.com/in/anshkant-malviya-1267a736b](https://linkedin.com/in/anshkant-malviya-1267a736b)
+- **GitHub**: [github.com/Anshkant](https://github.com/Anshkant)
+- **X (Twitter)**: [x.com/AnshkantMalviya](https://x.com/AnshkantMalviya)
+- **Instagram**: [instagram.com/ansh__malviya07](https://www.instagram.com/ansh__malviya07/)
+- **Email**: [malviyaanshkant@gmail.com](mailto:malviyaanshkant@gmail.com)
+
+---
+
+<p align="center">
+  Designed & Engineered by <strong>Anshkant Malviya</strong> · Nagpur, India
+</p>
