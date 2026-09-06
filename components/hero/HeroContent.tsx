@@ -8,8 +8,8 @@ import {
   FileText,
   Briefcase,
   GraduationCap,
-  Sparkle,
-  TerminalWindow,
+  ChartScatter,
+  Compass,
 } from "@phosphor-icons/react";
 import { ResumeModal } from "@/components/sections/ResumeModal";
 
@@ -87,31 +87,31 @@ export function HeroContent() {
             </div>
           </div>
 
-          {/* Right Column: Interactive 3D Python & Data Helix Badge */}
+          {/* Right Column: 3D Scatter Plot Status Callout */}
           <div className="pointer-events-none hidden flex-col items-end justify-center lg:col-span-5 lg:flex">
             <div className="max-w-xs space-y-2.5 rounded-2xl border border-line/80 bg-bg-surface/85 p-4 font-mono text-xs text-text-muted shadow-2xl backdrop-blur-md">
               <div className="flex items-center justify-between text-text-primary">
                 <span className="flex items-center gap-1.5 font-medium text-signal">
-                  <TerminalWindow
-                    size={15}
+                  <ChartScatter
+                    size={16}
                     weight="bold"
-                    className="text-structure"
+                    className="text-signal"
                   />
-                  <span>Pythonic Data Helix</span>
+                  <span>3D Scatter Plot (EDA)</span>
                 </span>
-                <span className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">
-                  LIVE INTERACTION
+                <span className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                  RAW NOISE → CLUSTERS
                 </span>
               </div>
               <p className="text-[11px] leading-relaxed text-text-muted/90">
-                Intertwining Python dual-serpent curves (Indigo = Code, Amber =
-                Data) over an interactive 3D statistical tensor surface. Move
-                mouse to tilt & ripple.
+                Particles start as a raw chaotic distribution, then assemble
+                into an interactive 3D Matplotlib scatter plot with X/Y/Z
+                coordinate axes. Move cursor to orbit.
               </p>
               <div className="flex items-center justify-between border-t border-line/60 pt-2 text-[10px]">
-                <span className="text-structure">Strand: Python Logic</span>
+                <span className="text-signal">Amber: Signal Cluster</span>
                 <span className="text-text-muted">·</span>
-                <span className="text-signal">Lattice: 3D Data Waves</span>
+                <span className="text-structure">Indigo: Structure</span>
               </div>
             </div>
           </div>
