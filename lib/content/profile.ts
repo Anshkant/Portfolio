@@ -35,10 +35,13 @@ export interface Profile {
   education: EducationItem[];
   internships: Internship[];
   certifications: CertificationItem[];
+  avatar: string;
   links: {
     github: string;
     linkedin: string;
     email: string;
+    instagram: string;
+    twitter: string;
   };
   tagline: string;
   headlines: {
@@ -115,10 +118,13 @@ export const profileData: Profile = {
       year: "In Progress (Jan 2027)",
     },
   ],
+  avatar: "/images/anshkant.jpg",
   links: {
     github: "https://github.com/Anshkant",
     linkedin: "https://linkedin.com/in/anshkant-malviya-1267a736b",
     email: "malviyaanshkant@gmail.com",
+    instagram: "https://www.instagram.com/ansh__malviya07/",
+    twitter: "https://x.com/AnshkantMalviya",
   },
   tagline:
     "Building production-ready software, data-driven solutions, and practical AI systems.",

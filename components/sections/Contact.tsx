@@ -10,6 +10,8 @@ import {
   GithubLogo,
   ArrowSquareOut,
   MapPin,
+  InstagramLogo,
+  XLogo,
 } from "@phosphor-icons/react";
 
 export function Contact() {
@@ -119,6 +121,42 @@ export function Contact() {
             >
               <GithubLogo size={15} weight="bold" className="text-signal" />
               <span>GitHub</span>
+              <ArrowSquareOut
+                size={13}
+                weight="bold"
+                className="text-text-muted"
+              />
+            </a>
+
+            {/* X / Twitter Profile */}
+            <a
+              href={profileData.links.twitter}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-line bg-bg-primary px-5 py-3.5 font-mono text-xs text-text-primary transition-colors duration-200 hover:border-line-highlight hover:bg-bg-elevated"
+            >
+              <XLogo size={14} weight="bold" />
+              <span>X (Twitter)</span>
+              <ArrowSquareOut
+                size={13}
+                weight="bold"
+                className="text-text-muted"
+              />
+            </a>
+
+            {/* Instagram Profile */}
+            <a
+              href={profileData.links.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 rounded-full border border-line bg-bg-primary px-5 py-3.5 font-mono text-xs text-text-primary transition-colors duration-200 hover:border-line-highlight hover:bg-bg-elevated hover:text-pink-400"
+            >
+              <InstagramLogo
+                size={15}
+                weight="bold"
+                className="text-pink-400"
+              />
+              <span>Instagram</span>
               <ArrowSquareOut
                 size={13}
                 weight="bold"

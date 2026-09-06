@@ -8,6 +8,8 @@ import {
   List,
   X,
   FileText,
+  InstagramLogo,
+  XLogo,
 } from "@phosphor-icons/react";
 import { ResumeModal } from "@/components/sections/ResumeModal";
 
@@ -49,7 +51,7 @@ export function Navbar() {
               <span className="h-2.5 w-2.5 rounded-full bg-structure transition-transform duration-300 group-hover:scale-110" />
               <span className="h-2.5 w-2.5 rounded-full bg-signal transition-transform duration-300 group-hover:scale-110" />
             </div>
-            <span className="font-display text-sm font-medium tracking-tight text-text-primary">
+            <span className="font-display text-base font-bold tracking-tight text-text-primary transition-colors group-hover:text-white sm:text-lg">
               {profileData.name}
             </span>
             <span className="hidden pl-1 font-mono text-xs text-text-muted/70 sm:inline-block">
@@ -71,7 +73,7 @@ export function Navbar() {
           </nav>
 
           {/* Social Links & Quick Resume Trigger */}
-          <div className="hidden items-center gap-2 sm:flex">
+          <div className="hidden items-center gap-1.5 sm:flex">
             <a
               href={profileData.links.github}
               target="_blank"
@@ -89,6 +91,24 @@ export function Navbar() {
               className="flex h-8 w-8 items-center justify-center rounded-full text-text-muted transition-colors duration-200 hover:bg-white/5 hover:text-text-primary"
             >
               <LinkedinLogo size={16} weight="bold" />
+            </a>
+            <a
+              href={profileData.links.twitter}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="X (Twitter) Profile"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-text-muted transition-colors duration-200 hover:bg-white/5 hover:text-text-primary"
+            >
+              <XLogo size={15} weight="bold" />
+            </a>
+            <a
+              href={profileData.links.instagram}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram Profile"
+              className="flex h-8 w-8 items-center justify-center rounded-full text-text-muted transition-colors duration-200 hover:bg-white/5 hover:text-pink-400"
+            >
+              <InstagramLogo size={16} weight="bold" />
             </a>
 
             <button
@@ -141,14 +161,14 @@ export function Navbar() {
                 <FileText size={16} weight="bold" />
                 <span>View Full Resume</span>
               </button>
-              <div className="flex items-center gap-3 pt-3">
+              <div className="flex flex-wrap items-center gap-3 pt-3">
                 <a
                   href={profileData.links.github}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 font-mono text-xs text-text-muted hover:text-text-primary"
+                  className="flex items-center gap-1.5 font-mono text-xs text-text-muted hover:text-text-primary"
                 >
-                  <GithubLogo size={16} weight="bold" />
+                  <GithubLogo size={15} weight="bold" />
                   <span>GitHub</span>
                 </a>
                 <span className="text-line">|</span>
@@ -156,10 +176,30 @@ export function Navbar() {
                   href={profileData.links.linkedin}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-2 font-mono text-xs text-text-muted hover:text-text-primary"
+                  className="flex items-center gap-1.5 font-mono text-xs text-text-muted hover:text-text-primary"
                 >
-                  <LinkedinLogo size={16} weight="bold" />
+                  <LinkedinLogo size={15} weight="bold" />
                   <span>LinkedIn</span>
+                </a>
+                <span className="text-line">|</span>
+                <a
+                  href={profileData.links.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 font-mono text-xs text-text-muted hover:text-text-primary"
+                >
+                  <XLogo size={14} weight="bold" />
+                  <span>X</span>
+                </a>
+                <span className="text-line">|</span>
+                <a
+                  href={profileData.links.instagram}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 font-mono text-xs text-text-muted hover:text-pink-400"
+                >
+                  <InstagramLogo size={15} weight="bold" />
+                  <span>Instagram</span>
                 </a>
               </div>
             </nav>
