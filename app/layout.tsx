@@ -3,6 +3,7 @@ import { Space_Grotesk, Inter, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
 import { Navbar } from "@/components/navigation/Navbar";
 import { Footer } from "@/components/navigation/Footer";
+import { Preloader } from "@/components/ui/Preloader";
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ["latin"],
@@ -60,6 +61,8 @@ export default function RootLayout({
       className={`${spaceGrotesk.variable} ${inter.variable} ${jetbrainsMono.variable} dark scroll-smooth`}
     >
       <body className="min-h-screen bg-bg-primary text-text-primary antialiased selection:bg-structure/30 selection:text-text-primary">
+        {/* Attractive 1 to 100% Loader */}
+        <Preloader />
         <Navbar />
         <main className="flex min-h-screen w-full flex-col items-center overflow-x-hidden">
           {children}

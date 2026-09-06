@@ -21,42 +21,40 @@ export function Projects() {
       className="relative mx-auto w-full max-w-6xl px-6 py-28"
     >
       {/* Section Header */}
-      <div className="mb-16 max-w-3xl">
-        <h2 className="mb-4 font-display text-3xl font-medium tracking-tight text-text-primary sm:text-4xl md:text-5xl">
-          Featured systems & investigations.
+      <div className="mb-12 max-w-2xl">
+        <h2 className="mb-3 font-display text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
+          Featured Projects
         </h2>
-        <p className="max-w-[65ch] font-body text-base leading-relaxed text-text-muted sm:text-lg">
-          Real-world applications spanning computer vision surveillance
-          pipelines, enterprise software architectures, and high-stakes clinical
-          and business analytics.
+        <p className="font-body text-base text-text-muted">
+          Production software and analytical models spanning real-time computer
+          vision, enterprise ERP, and clinical intelligence.
         </p>
       </div>
 
       {/* Flagship Centerpiece: VanRakshak AI */}
-      <div className="relative mb-10 overflow-hidden rounded-3xl border border-purple-500/30 bg-bg-surface p-6 shadow-2xl shadow-purple-950/20 sm:p-10">
+      <div className="relative mb-10 overflow-hidden rounded-3xl border border-purple-500/30 bg-bg-surface p-6 shadow-2xl shadow-purple-950/20 sm:p-8">
         {/* Accent Glow Strip */}
         <div className="absolute left-0 right-0 top-0 h-1.5 bg-gradient-to-r from-structure via-purple-500 to-signal" />
 
         <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-12">
           {/* Left Column: Details */}
-          <div className="space-y-6 lg:col-span-7">
+          <div className="space-y-5 lg:col-span-7">
             <div className="flex items-center gap-3">
               <span className="h-2.5 w-2.5 animate-pulse rounded-full bg-purple-400" />
               <span className="font-mono text-xs uppercase tracking-wider text-purple-300">
-                Flagship Project · {flagship.leanLabel}
+                Flagship Project · Published Research (IJRASET79908)
               </span>
             </div>
 
-            <h3 className="font-display text-3xl font-medium text-text-primary sm:text-4xl">
+            <h3 className="font-display text-2xl font-bold text-text-primary sm:text-3xl">
               {flagship.title}
             </h3>
 
-            <p className="font-mono text-sm text-purple-300/90">
-              {flagship.tagline}
-            </p>
-
             <p className="font-body text-sm leading-relaxed text-text-muted sm:text-base">
-              {flagship.longDescription || flagship.description}
+              AI-powered multi-camera surveillance pipeline published in
+              IJRASET. Fuses YOLOv8 detection with DeepSORT tracking to cut
+              emergency response to under 60 seconds via automated Telegram
+              alerts.
             </p>
 
             {/* Metrics Grid */}

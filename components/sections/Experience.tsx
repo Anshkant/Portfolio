@@ -21,15 +21,14 @@ export function Experience() {
       className="relative mx-auto w-full max-w-6xl px-6 py-28"
     >
       {/* Section Header */}
-      <div className="mb-16 flex flex-col justify-between gap-6 md:flex-row md:items-end">
+      <div className="mb-12 flex flex-col justify-between gap-6 md:flex-row md:items-end">
         <div className="max-w-2xl">
-          <h2 className="mb-4 font-display text-3xl font-medium tracking-tight text-text-primary sm:text-4xl md:text-5xl">
-            Experience & Education.
+          <h2 className="mb-3 font-display text-3xl font-bold tracking-tight text-text-primary sm:text-4xl">
+            Experience & Education
           </h2>
-          <p className="font-body text-base leading-relaxed text-text-muted sm:text-lg">
-            Hands-on software development internship delivering enterprise
-            client apps, combined with rigorous academic research in computer
-            vision and data science.
+          <p className="font-body text-base text-text-muted">
+            Production development internship at Atorix IT Solutions, combined
+            with published AI research and academic foundations.
           </p>
         </div>
 
