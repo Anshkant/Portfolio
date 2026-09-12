@@ -91,10 +91,35 @@ export function ScatterPlotScene({
   const pointsMaterialRef = useRef<THREE.ShaderMaterial>(null);
   const axesGroupRef = useRef<THREE.Group>(null);
 
-  const isMobile = typeof window !== "undefined" && window.innerWidth < 1024;
-  const positionX = isMobile ? 0 : 1.35;
-  const scale = isMobile ? 0.9 : 1.15;
-  const particleCount = isMobile ? 1600 : 3200;
+  // Responsive device classification: mobile (<768), tablet (768-1023), desktop (>=1024)
+  const [device, setDevice] = React.useState<"mobile" | "tablet" | "desktop">(
+    "desktop"
+  );
+
+  React.useEffect(() => {
+    const checkDevice = () => {
+      const w = window.innerWidth;
+      if (w < 768) {
+        setDevice("mobile");
+      } else if (w < 1024) {
+        setDevice("tablet");
+      } else {
+        setDevice("desktop");
+      }
+    };
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
+
+  const positionX = device === "mobile" ? 0 : device === "tablet" ? 0.6 : 1.35;
+  const positionY =
+    device === "mobile" ? -0.35 : device === "tablet" ? -0.1 : 0;
+  const scale = device === "mobile" ? 0.68 : device === "tablet" ? 0.88 : 1.15;
+  const particleCount =
+    device === "mobile" ? 1400 : device === "tablet" ? 2200 : 3200;
+  const maxOpacity =
+    device === "mobile" ? 0.52 : device === "tablet" ? 0.72 : 0.95;
 
   // -------------------------------------------------------------
   // GENERATE DATASETS: RAW NOISE (State A) -> CLEAN EDA SCATTER (State B)
@@ -281,7 +306,7 @@ export function ScatterPlotScene({
 
     if (reducedMotion) {
       u.uProgress.value = 1.0;
-      u.uOpacity.value = 0.95;
+      u.uOpacity.value = maxOpacity;
       if (axesGroupRef.current) axesGroupRef.current.visible = true;
       return;
     }
@@ -290,13 +315,11 @@ export function ScatterPlotScene({
 
     u.uTime.value += delta;
 
-    if (u.uOpacity.value < 0.95) {
-      u.uOpacity.value = THREE.MathUtils.lerp(
-        u.uOpacity.value,
-        0.95,
-        delta * 3.0
-      );
-    }
+    u.uOpacity.value = THREE.MathUtils.lerp(
+      u.uOpacity.value,
+      maxOpacity,
+      delta * 3.0
+    );
 
     // Auto-assembly on load + scroll boost
     const autoAssembly = THREE.MathUtils.clamp(
@@ -331,7 +354,7 @@ export function ScatterPlotScene({
       });
     }
 
-    // Mouse parallax for interactive 3D inspection
+    // Mouse & Touch parallax for interactive 3D inspection
     const targetRotX = -pointer.y * 0.45 + 0.18;
     const targetRotY = pointer.x * 0.75 + 0.35;
 
@@ -352,7 +375,7 @@ export function ScatterPlotScene({
       <ambientLight intensity={0.6} />
 
       {/* Main 3D Scatter Plot Assembly */}
-      <group position={[positionX, 0, 0]} scale={scale}>
+      <group position={[positionX, positionY, 0]} scale={scale}>
         <group ref={mainGroupRef}>
           {/* --------------------------------------------------------- */}
           {/* 1. THE PARTICLES (Morphing from Noisy Cloud to 3D Scatter) */}

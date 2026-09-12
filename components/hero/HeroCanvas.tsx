@@ -46,9 +46,10 @@ export default function HeroCanvas() {
 
   return (
     <div className="absolute inset-0 z-0 overflow-hidden" aria-hidden="true">
-      {/* Directional scrim: guarantees text on left is 100% crisp and readable */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-full bg-gradient-to-r from-bg-primary via-bg-primary/95 to-transparent lg:w-3/5" />
-      <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-bg-primary via-transparent to-bg-primary/60" />
+      {/* Directional scrim: guarantees text on left and mobile hero is 100% crisp and readable */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-full bg-gradient-to-r from-bg-primary via-bg-primary/90 to-transparent lg:w-3/5" />
+      <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-t from-bg-primary via-transparent to-bg-primary/70" />
+      <div className="pointer-events-none absolute inset-0 z-10 bg-gradient-to-b from-bg-primary/90 via-transparent to-transparent md:hidden" />
 
       {/* Ambient glowing halos matching Data & Software colors */}
       <div className="pointer-events-none absolute -left-10 top-1/4 h-96 w-96 rounded-full bg-structure/10 blur-[140px]" />
@@ -64,7 +65,7 @@ export default function HeroCanvas() {
             powerPreference: "high-performance",
           }}
           dpr={[1, 2]}
-          className="h-full w-full"
+          className="h-full w-full touch-pan-y"
         >
           <ScatterPlotScene
             scrollProgress={scrollProgress}
