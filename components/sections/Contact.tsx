@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useState } from "react";
 import { profileData } from "@/lib/content/profile";
@@ -30,7 +30,7 @@ export function Contact() {
   return (
     <section
       id="contact"
-      className="relative mx-auto w-full max-w-6xl px-4 py-20 sm:px-6 sm:py-28"
+      className="relative mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24"
     >
       {/* Background ambient lighting */}
       <div className="pointer-events-none absolute bottom-10 left-1/2 h-96 w-96 -translate-x-1/2 rounded-full bg-structure/5 blur-[140px]" />
@@ -47,18 +47,13 @@ export function Contact() {
             <span>Available for New Roles</span>
           </div>
 
-          <h2 className="mb-5 font-display text-2xl font-medium tracking-tight text-text-primary sm:mb-6 sm:text-4xl md:text-5xl">
+          <h2 className="mb-4 font-display text-2xl font-bold tracking-tight text-text-primary sm:text-4xl md:text-5xl">
             Let&apos;s build systems where code meets signal.
           </h2>
 
-          <blockquote className="mb-6 border-l-2 border-structure py-1 pl-4 font-body text-sm leading-relaxed text-text-primary/90 sm:mb-8 sm:text-base sm:text-lg">
-            &quot;{profileData.careerInterest}&quot;
-          </blockquote>
-
-          <p className="mb-8 max-w-[62ch] font-body text-sm leading-relaxed text-text-muted sm:mb-10 sm:text-base">
-            Whether you&apos;re looking for a software engineer who grasps
-            underlying data mechanics or a data analyst who writes clean,
-            production-ready code—I&apos;m open to conversations.
+          <p className="mb-8 max-w-[58ch] font-body text-sm leading-relaxed text-text-muted sm:text-base">
+            Open for Software Engineering and Data Analytics opportunities. Feel
+            free to reach out directly via email or connect across socials.
           </p>
 
           {/* Direct Action Hub */}
@@ -164,12 +159,12 @@ export function Contact() {
             </a>
           </div>
 
-          {/* Location & Metadata Note */}
-          <div className="mt-10 flex items-center gap-2 border-t border-line/60 pt-6 font-mono text-xs text-text-muted">
+          {/* Location & Note */}
+          <div className="mt-8 flex items-center gap-2 border-t border-line/60 pt-5 font-mono text-xs text-text-muted">
             <MapPin size={15} className="text-structure" />
             <span>
-              Based in Nagpur, India · Open to remote and on-site engineering &
-              analytics opportunities.
+              Based in Nagpur, India · Open to remote &amp; on-site engineering
+              roles.
             </span>
           </div>
         </div>

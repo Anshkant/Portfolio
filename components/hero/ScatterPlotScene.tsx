@@ -1,354 +1,278 @@
-﻿"use client";
+"use client";
 
-import React, { useRef, useMemo, useEffect } from "react";
-import { useFrame } from "@react-three/fiber";
+import React, { useRef, useMemo } from "react";
+import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 
 const scatterVertexShader = `
-  uniform float uProgress;
+  uniform float uProgress;       // 0.0 = Raw Noisy Cloud, 1.0 = Clean Assembled Scatter Plot
   uniform float uTime;
   uniform float uPixelRatio;
 
-  attribute vec3 aPosFrom;
-  attribute vec3 aPosTo;
-  attribute vec3 aColorFrom;
-  attribute vec3 aColorTo;
+  attribute vec3 aTargetPosition; // The clean 3D scatter coordinates
+  attribute vec3 aClusterColor;   // Color assigned to each data cluster
   attribute float aSize;
   attribute float aRandom;
 
   varying vec3 vColor;
+  varying float vProgress;
 
   void main() {
+    vProgress = uProgress;
+
+    // Smoothstep transition
     float t = smoothstep(0.0, 1.0, uProgress);
 
-    vec3 pFrom = aPosFrom;
-    vec3 pTo = aPosTo;
+    // State A: Raw noise / chaotic uncleaned data with subtle brownian drift
+    vec3 rawPos = position;
+    rawPos.x += sin(uTime * 0.8 + aRandom * 6.28) * 0.06;
+    rawPos.y += cos(uTime * 0.9 + aRandom * 3.14) * 0.06;
+    rawPos.z += sin(uTime * 0.7 + aRandom * 4.5) * 0.06;
 
-    // Organic micro-breathing drift
-    pFrom.y += sin(uTime * 1.5 + aRandom * 6.28) * 0.02;
-    pTo.y += sin(uTime * 1.5 + aRandom * 6.28) * 0.02;
+    // State B: Structured 3D scatter plot coordinates
+    vec3 plotPos = aTargetPosition;
+    // Micro breathing in structured state
+    plotPos.y += sin(uTime * 1.2 + aRandom * 6.0) * 0.015;
 
-    vec3 pos = mix(pFrom, pTo, t);
-    vColor = mix(aColorFrom, aColorTo, t);
+    // Interpolate between Raw Noise and Clean Scatter Plot
+    vec3 currentPos = mix(rawPos, plotPos, t);
 
-    vec4 mvPosition = modelViewMatrix * vec4(pos, 1.0);
-    gl_Position = projectionMatrix * mvPosition;
+    // Dynamic color transition: from monochrome noise grey to rich cluster colors
+    vec3 rawColor = vec3(0.50, 0.55, 0.68); // Noisy unclassified data
+    vColor = mix(rawColor, aClusterColor, t);
 
-    gl_PointSize = aSize * uPixelRatio * (32.0 / -mvPosition.z);
+    vec4 modelViewPosition = modelViewMatrix * vec4(currentPos, 1.0);
+    gl_Position = projectionMatrix * modelViewPosition;
+
+    // Crisp point size, distance attenuated
+    gl_PointSize = aSize * uPixelRatio * (28.0 / -modelViewPosition.z);
   }
 `;
 
 const scatterFragmentShader = `
   precision mediump float;
+
   uniform float uOpacity;
+
   varying vec3 vColor;
+  varying float vProgress;
 
   void main() {
+    // Sharp circular data point
     vec2 coord = gl_PointCoord - vec2(0.5);
     float dist = length(coord);
-    if (dist > 0.5) discard;
 
-    float alpha = smoothstep(0.5, 0.15, dist) * uOpacity;
+    if (dist > 0.5) {
+      discard;
+    }
+
+    // Crisp edge with subtle antialiasing
+    float alpha = smoothstep(0.5, 0.25, dist) * uOpacity;
+
+    // Specular highlight in the center for a crisp data point feel
     float core = smoothstep(0.2, 0.0, dist);
-    vec3 finalColor = mix(vColor, vec3(1.0), core * 0.7);
+    vec3 finalColor = mix(vColor, vec3(1.0), core * 0.5);
 
     gl_FragColor = vec4(finalColor, alpha);
   }
 `;
 
-export type VisualizationMode = "scatter" | "neural" | "wave";
-
 interface ScatterPlotSceneProps {
-  mode?: VisualizationMode;
+  scrollProgress?: number;
   reducedMotion?: boolean;
 }
 
-interface ScatterUniforms {
-  uProgress: { value: number };
-  uTime: { value: number };
-  uPixelRatio: { value: number };
-  uOpacity: { value: number };
-  [key: string]: { value: unknown };
-}
-
 export function ScatterPlotScene({
-  mode = "scatter",
+  scrollProgress = 0,
   reducedMotion = false,
 }: ScatterPlotSceneProps) {
+  const { viewport } = useThree();
   const mainGroupRef = useRef<THREE.Group>(null);
   const pointsMaterialRef = useRef<THREE.ShaderMaterial>(null);
   const axesGroupRef = useRef<THREE.Group>(null);
-  const geoRef = useRef<THREE.BufferGeometry>(null);
 
-  // Particle count
-  const count = 1800;
+  // Responsive device classification: mobile (<768), tablet (768-1023), desktop (>=1024)
+  const [device, setDevice] = React.useState<"mobile" | "tablet" | "desktop">(
+    "desktop"
+  );
 
-  // -----------------------------------------------------------------
-  // 1. GENERATE THE 3 DISTINCT DATASET GEOMETRIES
-  // -----------------------------------------------------------------
-  const datasets = useMemo(() => {
-    const colorAmber = new THREE.Color("#F2B441"); // Signal / Analytics
-    const colorIndigo = new THREE.Color("#5C7CFA"); // Structure / Software
-    const colorViolet = new THREE.Color("#A78BFA"); // AI / Computer Vision
-    const colorCyan = new THREE.Color("#38BDF8"); // Data Flow
-
-    // A. MODE 1: 3D SCATTER PLOT (Matplotlib EDA with 3 clusters + trend line)
-    const scatterPos = new Float32Array(count * 3);
-    const scatterCol = new Float32Array(count * 3);
-
-    const clusterCenters = [
-      { x: -0.62, y: -0.35, z: -0.35, color: colorAmber, spread: 0.38 },
-      { x: 0.62, y: 0.45, z: 0.35, color: colorIndigo, spread: 0.38 },
-      { x: 0.02, y: 0.12, z: -0.45, color: colorViolet, spread: 0.32 },
-    ];
-
-    for (let i = 0; i < count; i++) {
-      const i3 = i * 3;
-      if (i < count * 0.8) {
-        const c = clusterCenters[i % 3]!;
-        const u1 = Math.random() || 0.001;
-        const u2 = Math.random();
-        const z0 =
-          Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
-        const z1 =
-          Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2);
-        const z2 = (Math.random() - 0.5) * 1.5;
-
-        scatterPos[i3] = c.x + z0 * c.spread;
-        scatterPos[i3 + 1] = c.y + z1 * c.spread;
-        scatterPos[i3 + 2] = c.z + z2 * c.spread;
-
-        scatterCol[i3] = c.color.r;
-        scatterCol[i3 + 1] = c.color.g;
-        scatterCol[i3 + 2] = c.color.b;
+  React.useEffect(() => {
+    const checkDevice = () => {
+      const w = window.innerWidth;
+      if (w < 768) {
+        setDevice("mobile");
+      } else if (w < 1024) {
+        setDevice("tablet");
       } else {
-        const tVal = (Math.random() - 0.5) * 2.2;
-        const res = (Math.random() - 0.5) * 0.2;
-        scatterPos[i3] = tVal * 0.88;
-        scatterPos[i3 + 1] = tVal * 0.65 + res;
-        scatterPos[i3 + 2] = tVal * 0.45 + (Math.random() - 0.5) * 0.22;
-
-        const gCol = tVal > 0 ? colorIndigo : colorAmber;
-        scatterCol[i3] = gCol.r;
-        scatterCol[i3 + 1] = gCol.g;
-        scatterCol[i3 + 2] = gCol.b;
+        setDevice("desktop");
       }
-    }
-
-    // B. MODE 2: NEURAL CORE (Spherical AI Tensor with pulsing concentric shells)
-    const neuralPos = new Float32Array(count * 3);
-    const neuralCol = new Float32Array(count * 3);
-
-    const phi = (1 + Math.sqrt(5)) / 2;
-    for (let i = 0; i < count; i++) {
-      const i3 = i * 3;
-      const isCore = i < count * 0.35;
-      const radius = isCore
-        ? 0.45 + Math.random() * 0.35
-        : 1.15 + (Math.random() - 0.5) * 0.25;
-
-      const y = 1 - (i / (count - 1)) * 2;
-      const rAtY = Math.sqrt(Math.max(0, 1 - y * y));
-      const theta = 2 * Math.PI * i * phi;
-
-      neuralPos[i3] = Math.cos(theta) * rAtY * radius;
-      neuralPos[i3 + 1] = y * radius;
-      neuralPos[i3 + 2] = Math.sin(theta) * rAtY * radius;
-
-      if (isCore) {
-        neuralCol[i3] = colorAmber.r;
-        neuralCol[i3 + 1] = colorAmber.g;
-        neuralCol[i3 + 2] = colorAmber.b;
-      } else {
-        const mixRatio = Math.sin(i * 0.05) * 0.5 + 0.5;
-        const col = mixRatio > 0.5 ? colorViolet : colorIndigo;
-        neuralCol[i3] = col.r;
-        neuralCol[i3 + 1] = col.g;
-        neuralCol[i3 + 2] = col.b;
-      }
-    }
-
-    // C. MODE 3: DATA WAVE (3D Continuous Flow Matrix / Frequency Fourier Surface)
-    const wavePos = new Float32Array(count * 3);
-    const waveCol = new Float32Array(count * 3);
-
-    const gridSide = Math.round(Math.sqrt(count));
-    let idx = 0;
-    for (let ix = 0; ix < gridSide && idx < count; ix++) {
-      for (let iz = 0; iz < gridSide && idx < count; iz++) {
-        const i3 = idx * 3;
-        const x = (ix / (gridSide - 1) - 0.5) * 2.6;
-        const z = (iz / (gridSide - 1) - 0.5) * 2.2;
-        const dist = Math.sqrt(x * x + z * z);
-        const y =
-          Math.sin(x * 3.0) * Math.cos(z * 2.6) * 0.5 +
-          Math.sin(dist * 2.5) * 0.2;
-
-        wavePos[i3] = x;
-        wavePos[i3 + 1] = y;
-        wavePos[i3 + 2] = z;
-
-        const elev = Math.max(0, Math.min(1, (y + 0.7) / 1.4));
-        const c1 = colorIndigo.clone().lerp(colorCyan, elev);
-        const cFinal =
-          elev > 0.6 ? c1.lerp(colorAmber, (elev - 0.6) / 0.4) : c1;
-
-        waveCol[i3] = cFinal.r;
-        waveCol[i3 + 1] = cFinal.g;
-        waveCol[i3 + 2] = cFinal.b;
-        idx++;
-      }
-    }
-
-    // Size and randoms
-    const sz = new Float32Array(count);
-    const rnd = new Float32Array(count);
-    for (let i = 0; i < count; i++) {
-      sz[i] = 1.1 + Math.random() * 1.5;
-      rnd[i] = Math.random();
-    }
-
-    return {
-      scatterPos,
-      scatterCol,
-      neuralPos,
-      neuralCol,
-      wavePos,
-      waveCol,
-      sizes: sz,
-      randoms: rnd,
     };
-  }, [count]);
+    checkDevice();
+    window.addEventListener("resize", checkDevice);
+    return () => window.removeEventListener("resize", checkDevice);
+  }, []);
 
-  // Active buffer arrays
-  const posFrom = useRef(new Float32Array(count * 3));
-  const posTo = useRef(new Float32Array(count * 3));
-  const colFrom = useRef(new Float32Array(count * 3));
-  const colTo = useRef(new Float32Array(count * 3));
+  const positionX = device === "mobile" ? 0 : device === "tablet" ? 0.6 : 1.35;
+  const positionY =
+    device === "mobile" ? -0.35 : device === "tablet" ? -0.1 : 0;
+  const scale = device === "mobile" ? 0.68 : device === "tablet" ? 0.88 : 1.15;
+  const particleCount =
+    device === "mobile" ? 1400 : device === "tablet" ? 2200 : 3200;
+  const maxOpacity =
+    device === "mobile" ? 0.52 : device === "tablet" ? 0.72 : 0.95;
 
-  // Initialize buffers on first render
-  useEffect(() => {
-    posFrom.current.set(datasets.scatterPos);
-    posTo.current.set(datasets.scatterPos);
-    colFrom.current.set(datasets.scatterCol);
-    colTo.current.set(datasets.scatterCol);
-  }, [datasets]);
+  // -------------------------------------------------------------
+  // GENERATE DATASETS: RAW NOISE (State A) -> CLEAN EDA SCATTER (State B)
+  // -------------------------------------------------------------
+  const { rawPositions, targetPositions, clusterColors, sizes, randoms } =
+    useMemo(() => {
+      const raw = new Float32Array(particleCount * 3);
+      const target = new Float32Array(particleCount * 3);
+      const colors = new Float32Array(particleCount * 3);
+      const sz = new Float32Array(particleCount);
+      const rnd = new Float32Array(particleCount);
 
-  // Track mode switches
-  const prevMode = useRef<VisualizationMode>(mode);
-  const morphProgress = useRef(1.0);
+      // Color definitions for clusters:
+      // Cluster 0: Warm Amber-Gold (Signal / Data Analytics) -> #F2B441
+      const colorAmber = new THREE.Color("#F2B441");
+      // Cluster 1: Electric Indigo (Structure / Software Engineering) -> #5C7CFA
+      const colorIndigo = new THREE.Color("#5C7CFA");
+      // Cluster 2: Soft Violet (AI/ML & Computer Vision Bridge) -> #A78BFA
+      const colorViolet = new THREE.Color("#A78BFA");
 
-  useEffect(() => {
-    if (mode === prevMode.current) return;
+      // Cluster Centers in 3D Plot Space (bounded in [-1.35, 1.35])
+      const clusterCenters = [
+        { x: -0.65, y: -0.35, z: -0.35, color: colorAmber, spread: 0.4 }, // Cluster A: Data Signal
+        { x: 0.65, y: 0.55, z: 0.35, color: colorIndigo, spread: 0.38 }, // Cluster B: Software Structure
+        { x: 0.05, y: 0.15, z: -0.5, color: colorViolet, spread: 0.34 }, // Cluster C: AI/ML Bridge
+      ];
 
-    // Get "from" data based on prevMode
-    const fromP =
-      prevMode.current === "scatter"
-        ? datasets.scatterPos
-        : prevMode.current === "neural"
-          ? datasets.neuralPos
-          : datasets.wavePos;
+      for (let i = 0; i < particleCount; i++) {
+        const i3 = i * 3;
+        rnd[i] = Math.random();
+        sz[i] = 1.0 + Math.random() * 1.4;
 
-    const fromC =
-      prevMode.current === "scatter"
-        ? datasets.scatterCol
-        : prevMode.current === "neural"
-          ? datasets.neuralCol
-          : datasets.waveCol;
+        // ---------------------------------------------------------
+        // STATE A: RAW NOISE (Chaotic 3D cloud before cleaning/EDA)
+        // ---------------------------------------------------------
+        const u = Math.random();
+        const v = Math.random();
+        const theta = u * 2.0 * Math.PI;
+        const phi = Math.acos(2.0 * v - 1.0);
+        const r = 2.2 * Math.cbrt(Math.random());
 
-    // Get "to" data based on new mode
-    const toP =
-      mode === "scatter"
-        ? datasets.scatterPos
-        : mode === "neural"
-          ? datasets.neuralPos
-          : datasets.wavePos;
+        raw[i3] = r * Math.sin(phi) * Math.cos(theta);
+        raw[i3 + 1] = r * Math.sin(phi) * Math.sin(theta);
+        raw[i3 + 2] = r * Math.cos(phi);
 
-    const toC =
-      mode === "scatter"
-        ? datasets.scatterCol
-        : mode === "neural"
-          ? datasets.neuralCol
-          : datasets.waveCol;
+        // ---------------------------------------------------------
+        // STATE B: CLEAN EDA 3D SCATTER PLOT (Clustered Distributions)
+        // ---------------------------------------------------------
+        if (i < particleCount * 0.8) {
+          const cIdx = i % 3;
+          const c = clusterCenters[cIdx]!;
 
-    posFrom.current.set(fromP);
-    posTo.current.set(toP);
-    colFrom.current.set(fromC);
-    colTo.current.set(toC);
+          const u1 = Math.random() || 0.001;
+          const u2 = Math.random();
+          const z0 =
+            Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
+          const z1 =
+            Math.sqrt(-2.0 * Math.log(u1)) * Math.sin(2.0 * Math.PI * u2);
+          const z2 = (Math.random() - 0.5) * 1.6;
 
-    if (geoRef.current) {
-      geoRef.current.attributes.aPosFrom!.needsUpdate = true;
-      geoRef.current.attributes.aPosTo!.needsUpdate = true;
-      geoRef.current.attributes.aColorFrom!.needsUpdate = true;
-      geoRef.current.attributes.aColorTo!.needsUpdate = true;
-    }
+          target[i3] = c.x + z0 * c.spread;
+          target[i3 + 1] = c.y + z1 * c.spread;
+          target[i3 + 2] = c.z + z2 * c.spread;
 
-    morphProgress.current = 0.0;
-    prevMode.current = mode;
-  }, [mode, datasets]);
+          colors[i3] = c.color.r;
+          colors[i3 + 1] = c.color.g;
+          colors[i3 + 2] = c.color.b;
+        } else {
+          // Regression / Trend Line with residual variance
+          const tVal = (Math.random() - 0.5) * 2.4;
+          const residual = (Math.random() - 0.5) * 0.22;
 
-  // -----------------------------------------------------------------
-  // 2. 3D AXES & REFERENCE GRIDS (Matplotlib style)
-  // -----------------------------------------------------------------
+          target[i3] = tVal * 0.9;
+          target[i3 + 1] = tVal * 0.65 + residual;
+          target[i3 + 2] = tVal * 0.45 + (Math.random() - 0.5) * 0.25;
+
+          const gradColor = tVal > 0 ? colorIndigo : colorAmber;
+          colors[i3] = gradColor.r;
+          colors[i3 + 1] = gradColor.g;
+          colors[i3 + 2] = gradColor.b;
+        }
+      }
+
+      return {
+        rawPositions: raw,
+        targetPositions: target,
+        clusterColors: colors,
+        sizes: sz,
+        randoms: rnd,
+      };
+    }, [particleCount]);
+
+  // -------------------------------------------------------------
+  // 3D AXIS LINES, TICK MARKS & GRID PLANES (Matplotlib 3D EDA Style)
+  // -------------------------------------------------------------
   const { axisLineGeo, gridLineGeo, tickGeo } = useMemo(() => {
-    const min = -1.3;
-    const max = 1.3;
+    const min = -1.35;
+    const max = 1.35;
     const axisPoints: THREE.Vector3[] = [];
     const tickPoints: THREE.Vector3[] = [];
 
-    // Primary 3D Axes
-    axisPoints.push(
-      new THREE.Vector3(min, min, min),
-      new THREE.Vector3(max + 0.25, min, min)
-    );
-    axisPoints.push(
-      new THREE.Vector3(min, min, min),
-      new THREE.Vector3(min, max + 0.25, min)
-    );
-    axisPoints.push(
-      new THREE.Vector3(min, min, min),
-      new THREE.Vector3(min, min, max + 0.25)
-    );
+    // X Axis line (floor, bottom-front)
+    axisPoints.push(new THREE.Vector3(min, min, min));
+    axisPoints.push(new THREE.Vector3(max + 0.25, min, min));
 
-    // Axis Ticks
+    // Y Axis line (vertical elevation)
+    axisPoints.push(new THREE.Vector3(min, min, min));
+    axisPoints.push(new THREE.Vector3(min, max + 0.25, min));
+
+    // Z Axis line (depth)
+    axisPoints.push(new THREE.Vector3(min, min, min));
+    axisPoints.push(new THREE.Vector3(min, min, max + 0.25));
+
+    // Tick marks along X, Y, and Z axes
     const steps = 4;
     const stepSize = (max - min) / steps;
+
     for (let i = 1; i <= steps; i++) {
       const val = min + i * stepSize;
-      tickPoints.push(
-        new THREE.Vector3(val, min, min),
-        new THREE.Vector3(val, min + 0.08, min)
-      );
-      tickPoints.push(
-        new THREE.Vector3(min, val, min),
-        new THREE.Vector3(min + 0.08, val, min)
-      );
-      tickPoints.push(
-        new THREE.Vector3(min, min, val),
-        new THREE.Vector3(min + 0.08, min, val)
-      );
+      // X ticks (vertical upward)
+      tickPoints.push(new THREE.Vector3(val, min, min));
+      tickPoints.push(new THREE.Vector3(val, min + 0.07, min));
+
+      // Y ticks (horizontal along X)
+      tickPoints.push(new THREE.Vector3(min, val, min));
+      tickPoints.push(new THREE.Vector3(min + 0.07, val, min));
+
+      // Z ticks (horizontal along X)
+      tickPoints.push(new THREE.Vector3(min, min, val));
+      tickPoints.push(new THREE.Vector3(min + 0.07, min, val));
     }
 
-    // Floor and Back Grids
+    // Floor and Back Grid lines (Matplotlib style)
     const gridPoints: THREE.Vector3[] = [];
+
+    // Floor grid (XZ plane at y = min)
     for (let i = 0; i <= steps; i++) {
       const v = min + i * stepSize;
-      gridPoints.push(
-        new THREE.Vector3(min, min, v),
-        new THREE.Vector3(max, min, v)
-      );
-      gridPoints.push(
-        new THREE.Vector3(v, min, min),
-        new THREE.Vector3(v, min, max)
-      );
-      gridPoints.push(
-        new THREE.Vector3(min, v, min),
-        new THREE.Vector3(max, v, min)
-      );
-      gridPoints.push(
-        new THREE.Vector3(v, min, min),
-        new THREE.Vector3(v, max, min)
-      );
+      gridPoints.push(new THREE.Vector3(min, min, v));
+      gridPoints.push(new THREE.Vector3(max, min, v));
+
+      gridPoints.push(new THREE.Vector3(v, min, min));
+      gridPoints.push(new THREE.Vector3(v, min, max));
+    }
+
+    // Back wall grid (XY plane at z = min)
+    for (let i = 0; i <= steps; i++) {
+      const v = min + i * stepSize;
+      gridPoints.push(new THREE.Vector3(min, v, min));
+      gridPoints.push(new THREE.Vector3(max, v, min));
+
+      gridPoints.push(new THREE.Vector3(v, min, min));
+      gridPoints.push(new THREE.Vector3(v, max, min));
     }
 
     return {
@@ -358,156 +282,202 @@ export function ScatterPlotScene({
     };
   }, []);
 
+  interface ScatterUniforms {
+    uProgress: { value: number };
+    uTime: { value: number };
+    uPixelRatio: { value: number };
+    uOpacity: { value: number };
+    [key: string]: { value: unknown };
+  }
+
   const uniforms = useMemo<ScatterUniforms>(
     () => ({
-      uProgress: { value: 1.0 },
+      uProgress: { value: 0.0 },
       uTime: { value: 0.0 },
       uPixelRatio: { value: 1.0 },
-      uOpacity: { value: 1.0 },
+      uOpacity: { value: 0.0 },
     }),
     []
   );
 
-  // -----------------------------------------------------------------
-  // 3. ANIMATION & TOUCH/ORBIT PHYSICS
-  // -----------------------------------------------------------------
   useFrame((state, delta) => {
     if (!pointsMaterialRef.current || !mainGroupRef.current) return;
     const u = pointsMaterialRef.current.uniforms as ScatterUniforms;
 
-    u.uTime.value += delta;
-
-    // Morph progress animation
-    if (morphProgress.current < 1.0) {
-      morphProgress.current = Math.min(
-        1.0,
-        morphProgress.current + delta * 2.2
-      );
-      u.uProgress.value = morphProgress.current;
+    if (reducedMotion) {
+      u.uProgress.value = 1.0;
+      u.uOpacity.value = maxOpacity;
+      if (axesGroupRef.current) axesGroupRef.current.visible = true;
+      return;
     }
 
-    // Target axes opacity: visible only in "scatter" mode
-    const targetAxesOpacity = mode === "scatter" ? 0.55 : 0.0;
+    const { pointer, clock } = state;
+
+    u.uTime.value += delta;
+
+    u.uOpacity.value = THREE.MathUtils.lerp(
+      u.uOpacity.value,
+      maxOpacity,
+      delta * 3.0
+    );
+
+    // Auto-assembly on load + scroll boost
+    const autoAssembly = THREE.MathUtils.clamp(
+      clock.elapsedTime * 0.75,
+      0.0,
+      1.0
+    );
+    const targetProgress = THREE.MathUtils.clamp(
+      autoAssembly + scrollProgress * 1.5,
+      0.0,
+      1.0
+    );
+
+    u.uProgress.value = THREE.MathUtils.lerp(
+      u.uProgress.value,
+      targetProgress,
+      delta * 3.0
+    );
+
+    // Fade in axes as plot assembles
     if (axesGroupRef.current) {
+      const axesProgress = THREE.MathUtils.smoothstep(
+        u.uProgress.value,
+        0.3,
+        0.95
+      );
       axesGroupRef.current.traverse((child) => {
         if (child instanceof THREE.LineSegments) {
           const mat = child.material as THREE.LineBasicMaterial;
-          mat.opacity = THREE.MathUtils.lerp(
-            mat.opacity,
-            targetAxesOpacity,
-            delta * 4.0
-          );
-          mat.visible = mat.opacity > 0.01;
+          mat.opacity = axesProgress * 0.45;
         }
       });
     }
 
-    // Gentle continuous spin when idle
-    if (!reducedMotion) {
-      mainGroupRef.current.rotation.y += delta * 0.35;
-    }
+    // Mouse & Touch parallax for interactive 3D inspection
+    const targetRotX = -pointer.y * 0.45 + 0.18;
+    const targetRotY = pointer.x * 0.75 + 0.35;
+
+    mainGroupRef.current.rotation.x = THREE.MathUtils.lerp(
+      mainGroupRef.current.rotation.x,
+      targetRotX,
+      delta * 3.5
+    );
+    mainGroupRef.current.rotation.y = THREE.MathUtils.lerp(
+      mainGroupRef.current.rotation.y,
+      targetRotY,
+      delta * 3.5
+    );
   });
 
   return (
     <>
-      <ambientLight intensity={0.8} />
+      <ambientLight intensity={0.6} />
 
-      <group ref={mainGroupRef} scale={1.05}>
-        {/* The Morphing Luminous Particles */}
-        <points>
-          <bufferGeometry ref={geoRef}>
-            <bufferAttribute
-              attach="attributes-aPosFrom"
-              count={count}
-              array={posFrom.current}
-              itemSize={3}
+      {/* Main 3D Scatter Plot Assembly */}
+      <group position={[positionX, positionY, 0]} scale={scale}>
+        <group ref={mainGroupRef}>
+          {/* --------------------------------------------------------- */}
+          {/* 1. THE PARTICLES (Morphing from Noisy Cloud to 3D Scatter) */}
+          {/* --------------------------------------------------------- */}
+          <points>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={rawPositions.length / 3}
+                array={rawPositions}
+                itemSize={3}
+              />
+              <bufferAttribute
+                attach="attributes-aTargetPosition"
+                count={targetPositions.length / 3}
+                array={targetPositions}
+                itemSize={3}
+              />
+              <bufferAttribute
+                attach="attributes-aClusterColor"
+                count={clusterColors.length / 3}
+                array={clusterColors}
+                itemSize={3}
+              />
+              <bufferAttribute
+                attach="attributes-aSize"
+                count={sizes.length}
+                array={sizes}
+                itemSize={1}
+              />
+              <bufferAttribute
+                attach="attributes-aRandom"
+                count={randoms.length}
+                array={randoms}
+                itemSize={1}
+              />
+            </bufferGeometry>
+            <shaderMaterial
+              ref={pointsMaterialRef}
+              vertexShader={scatterVertexShader}
+              fragmentShader={scatterFragmentShader}
+              uniforms={uniforms}
+              transparent
+              depthWrite={false}
+              blending={THREE.AdditiveBlending}
             />
-            <bufferAttribute
-              attach="attributes-aPosTo"
-              count={count}
-              array={posTo.current}
-              itemSize={3}
-            />
-            <bufferAttribute
-              attach="attributes-aColorFrom"
-              count={count}
-              array={colFrom.current}
-              itemSize={3}
-            />
-            <bufferAttribute
-              attach="attributes-aColorTo"
-              count={count}
-              array={colTo.current}
-              itemSize={3}
-            />
-            <bufferAttribute
-              attach="attributes-aSize"
-              count={datasets.sizes.length}
-              array={datasets.sizes}
-              itemSize={1}
-            />
-            <bufferAttribute
-              attach="attributes-aRandom"
-              count={datasets.randoms.length}
-              array={datasets.randoms}
-              itemSize={1}
-            />
-          </bufferGeometry>
-          <shaderMaterial
-            ref={pointsMaterialRef}
-            vertexShader={scatterVertexShader}
-            fragmentShader={scatterFragmentShader}
-            uniforms={uniforms}
-            transparent
-            depthWrite={false}
-            blending={THREE.AdditiveBlending}
-          />
-        </points>
+          </points>
 
-        {/* 3D Coordinate Frame & Grids (Matplotlib Style) */}
-        <group ref={axesGroupRef}>
-          <lineSegments geometry={axisLineGeo}>
-            <lineBasicMaterial
-              color="#5C7CFA"
-              transparent
-              opacity={0.55}
-              linewidth={1.5}
-            />
-          </lineSegments>
-          <lineSegments geometry={tickGeo}>
-            <lineBasicMaterial
-              color="#EDEFF4"
-              transparent
-              opacity={0.45}
-              linewidth={1.2}
-            />
-          </lineSegments>
-          <lineSegments geometry={gridLineGeo}>
-            <lineBasicMaterial
-              color="#232838"
-              transparent
-              opacity={0.3}
-              linewidth={1.0}
-            />
-          </lineSegments>
+          {/* --------------------------------------------------------- */}
+          {/* 2. 3D AXIS COORDINATE FRAME & GRID PLANES (Matplotlib EDA) */}
+          {/* --------------------------------------------------------- */}
+          <group ref={axesGroupRef}>
+            {/* Primary X, Y, Z Coordinate Axes */}
+            <lineSegments geometry={axisLineGeo}>
+              <lineBasicMaterial
+                color="#5C7CFA"
+                transparent
+                opacity={0.45}
+                linewidth={1.5}
+              />
+            </lineSegments>
 
-          {/* Coordinate Origin & Axis Tip Spheres */}
-          <mesh position={[-1.3, -1.3, -1.3]}>
-            <sphereGeometry args={[0.04, 16, 16]} />
-            <meshBasicMaterial color="#EDEFF4" />
-          </mesh>
-          <mesh position={[1.55, -1.3, -1.3]}>
-            <sphereGeometry args={[0.035, 12, 12]} />
-            <meshBasicMaterial color="#5C7CFA" />
-          </mesh>
-          <mesh position={[-1.3, 1.55, -1.3]}>
-            <sphereGeometry args={[0.035, 12, 12]} />
-            <meshBasicMaterial color="#F2B441" />
-          </mesh>
-          <mesh position={[-1.3, -1.3, 1.55]}>
-            <sphereGeometry args={[0.035, 12, 12]} />
-            <meshBasicMaterial color="#A78BFA" />
-          </mesh>
+            {/* Axis Tick Marks */}
+            <lineSegments geometry={tickGeo}>
+              <lineBasicMaterial
+                color="#EDEFF4"
+                transparent
+                opacity={0.4}
+                linewidth={1.2}
+              />
+            </lineSegments>
+
+            {/* Background & Floor Reference Grids */}
+            <lineSegments geometry={gridLineGeo}>
+              <lineBasicMaterial
+                color="#232838"
+                transparent
+                opacity={0.3}
+                linewidth={1.0}
+              />
+            </lineSegments>
+
+            {/* Axis Origin Marker Dot */}
+            <mesh position={[-1.35, -1.35, -1.35]}>
+              <sphereGeometry args={[0.04, 16, 16]} />
+              <meshBasicMaterial color="#EDEFF4" />
+            </mesh>
+
+            {/* Axis Tips: X, Y, Z Indicators */}
+            <mesh position={[1.6, -1.35, -1.35]}>
+              <sphereGeometry args={[0.035, 12, 12]} />
+              <meshBasicMaterial color="#5C7CFA" />
+            </mesh>
+            <mesh position={[-1.35, 1.6, -1.35]}>
+              <sphereGeometry args={[0.035, 12, 12]} />
+              <meshBasicMaterial color="#F2B441" />
+            </mesh>
+            <mesh position={[-1.35, -1.35, 1.6]}>
+              <sphereGeometry args={[0.035, 12, 12]} />
+              <meshBasicMaterial color="#A78BFA" />
+            </mesh>
+          </group>
         </group>
       </group>
     </>

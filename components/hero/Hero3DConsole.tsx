@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
-import { ScatterPlotScene, VisualizationMode } from "./ScatterPlotScene";
+import { Mobile3DScene, VisualizationMode } from "./Mobile3DScene";
 import { ChartScatter, Brain, Waveform, HandTap } from "@phosphor-icons/react";
 
 export function Hero3DConsole() {
@@ -56,7 +56,7 @@ export function Hero3DConsole() {
             dampingFactor={0.06}
             autoRotate={false}
           />
-          <ScatterPlotScene mode={mode} />
+          <Mobile3DScene mode={mode} />
         </Canvas>
       </div>
 
@@ -64,7 +64,7 @@ export function Hero3DConsole() {
       <div className="border-t border-line/60 pt-2.5">
         <div className="mb-1.5 flex items-center justify-between font-mono text-[9px] uppercase tracking-wider text-text-muted sm:text-[10px]">
           <span>Select 3D Topology:</span>
-          <span className="text-emerald-400">1,800 Active Nodes</span>
+          <span className="text-emerald-400">1,600 Active Nodes</span>
         </div>
 
         <div className="grid grid-cols-3 gap-1.5 sm:gap-2">

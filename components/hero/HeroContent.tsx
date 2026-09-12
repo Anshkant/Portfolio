@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import { profileData } from "@/lib/content/profile";
@@ -9,53 +9,34 @@ import {
   FileText,
   Briefcase,
   GraduationCap,
+  ChartScatter,
   LinkedinLogo,
   InstagramLogo,
   XLogo,
 } from "@phosphor-icons/react";
 import { ResumeModal } from "@/components/sections/ResumeModal";
 
-// Dynamically import 3D Console without SSR
+// Mobile 3D Console (loaded dynamically only on mobile)
 const Hero3DConsole = dynamic(
   () => import("./Hero3DConsole").then((mod) => mod.Hero3DConsole),
-  {
-    ssr: false,
-    loading: () => (
-      <div className="flex h-64 w-full items-center justify-center rounded-2xl border border-line bg-bg-surface/50 font-mono text-xs text-text-muted sm:h-72 lg:h-[340px]">
-        <div className="flex items-center gap-2">
-          <span className="h-2 w-2 animate-pulse rounded-full bg-structure" />
-          <span>INITIALIZING 3D ENGINE...</span>
-        </div>
-      </div>
-    ),
-  }
+  { ssr: false }
 );
 
 export function HeroContent() {
   const [resumeOpen, setResumeOpen] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-    const updateSize = () => setIsDesktop(window.innerWidth >= 1024);
-    updateSize();
-    window.addEventListener("resize", updateSize);
-    return () => window.removeEventListener("resize", updateSize);
-  }, []);
 
   return (
     <>
-      <div className="relative z-20 mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col justify-between px-4 pb-8 pt-20 sm:px-6 sm:pb-10 sm:pt-28">
+      <div className="pointer-events-none relative z-20 mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col justify-between px-4 pb-8 pt-20 sm:px-6 sm:pb-10 sm:pt-28">
         {/* Top Duality Indicator Pill */}
-        <div className="flex items-center justify-between">
+        <div className="pointer-events-auto flex items-center justify-between">
           <div className="inline-flex items-center gap-2 rounded-full border border-line bg-bg-surface/95 px-3 py-1.5 shadow-lg shadow-black/30 backdrop-blur-md sm:gap-3 sm:px-4">
-            <span className="flex items-center gap-1.5 font-mono text-[10px] font-medium text-structure sm:text-xs">
+            <span className="flex items-center gap-1.5 font-mono text-[11px] font-medium text-structure sm:text-xs">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-structure sm:h-2 sm:w-2" />
               Python &amp; Software
             </span>
             <span className="text-[10px] text-text-muted sm:text-xs">⇄</span>
-            <span className="flex items-center gap-1.5 font-mono text-[10px] font-medium text-signal sm:text-xs">
+            <span className="flex items-center gap-1.5 font-mono text-[11px] font-medium text-signal sm:text-xs">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-signal sm:h-2 sm:w-2" />
               Data &amp; ML
             </span>
@@ -70,7 +51,7 @@ export function HeroContent() {
         {/* Main Hero Grid */}
         <div className="my-auto grid grid-cols-1 items-center gap-6 py-4 sm:gap-8 sm:py-6 lg:grid-cols-12">
           {/* Left Column: Identity, Value Prop, CTA Buttons */}
-          <div className="max-w-2xl space-y-5 sm:space-y-6 lg:col-span-7">
+          <div className="pointer-events-auto max-w-2xl space-y-5 sm:space-y-6 lg:col-span-7">
             {/* Photo + Identity */}
             <div className="flex flex-row items-center gap-4 sm:gap-6">
               <div className="relative h-20 w-20 shrink-0 rounded-full bg-gradient-to-tr from-structure via-purple-500 to-signal p-[3px] shadow-2xl shadow-structure/30 ring-4 ring-structure/20 sm:h-28 sm:w-28 md:h-32 md:w-32">
@@ -99,22 +80,20 @@ export function HeroContent() {
               </div>
             </div>
 
-            {/* Mobile-Only 3D Interactive Console (Renders directly here on mobile!) */}
-            {mounted && !isDesktop && (
-              <div className="my-2 block lg:hidden">
-                <Hero3DConsole />
-              </div>
-            )}
+            {/* Mobile-Only 3D Console (Dedicated standout 3D for Mobile) */}
+            <div className="block md:hidden">
+              <Hero3DConsole />
+            </div>
 
-            {/* Core Value Proposition */}
-            <h2 className="font-display text-xl font-bold leading-tight tracking-tight text-text-primary drop-shadow-md sm:text-2xl lg:text-4xl">
+            {/* Value Prop */}
+            <h2 className="font-display text-xl font-bold leading-tight tracking-tight text-text-primary drop-shadow-md sm:text-3xl lg:text-4xl">
               I turn scattered data into decisions, and decisions into software.
             </h2>
 
             <p className="max-w-[54ch] font-body text-sm leading-relaxed text-text-muted sm:text-base">
-              Building production-ready software, analytical data pipelines, and
-              computer vision systems. 6 months on-site internship at Atorix IT
-              Solutions, Pune.
+              Software engineer and data analyst building analytical data
+              pipelines, computer vision systems, and production web platforms.
+              6 months on-site internship at Atorix IT Solutions, Pune.
             </p>
 
             {/* Action Buttons */}
@@ -171,16 +150,38 @@ export function HeroContent() {
             </div>
           </div>
 
-          {/* Desktop-Only 3D Column */}
-          {mounted && isDesktop && (
-            <div className="hidden lg:col-span-5 lg:block">
-              <Hero3DConsole />
+          {/* Right Column for Laptop & Tablet: 3D Scatter Plot Callout Badge */}
+          <div className="pointer-events-none hidden flex-col items-end justify-center md:flex lg:col-span-5">
+            <div className="max-w-xs space-y-2.5 rounded-2xl border border-line/80 bg-bg-surface/85 p-4 font-mono text-xs text-text-muted shadow-2xl backdrop-blur-md">
+              <div className="flex items-center justify-between text-text-primary">
+                <span className="flex items-center gap-1.5 font-medium text-signal">
+                  <ChartScatter
+                    size={16}
+                    weight="bold"
+                    className="text-signal"
+                  />
+                  <span>3D Scatter Plot (EDA)</span>
+                </span>
+                <span className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+                  RAW NOISE → SCATTER
+                </span>
+              </div>
+              <p className="text-[11px] leading-relaxed text-text-muted/90">
+                Particles start as raw noisy data, then assemble into an
+                interactive 3D scatter plot with X/Y/Z coordinate axes. Move
+                cursor to orbit.
+              </p>
+              <div className="flex items-center justify-between border-t border-line/60 pt-2 text-[10px]">
+                <span className="text-signal">Amber: Data Signal</span>
+                <span className="text-text-muted">·</span>
+                <span className="text-structure">Indigo: Code Structure</span>
+              </div>
             </div>
-          )}
+          </div>
         </div>
 
         {/* Bottom Telemetry Strip */}
-        <div className="grid grid-cols-2 gap-2 border-t border-line/60 pt-4 sm:grid-cols-4 sm:gap-3 sm:pt-6">
+        <div className="pointer-events-auto grid grid-cols-2 gap-2 border-t border-line/60 pt-4 sm:grid-cols-4 sm:gap-3 sm:pt-6">
           <div className="flex items-center gap-2 font-mono text-[10px] text-text-muted sm:text-xs">
             <Briefcase size={13} className="shrink-0 text-structure" />
             <span className="truncate">Atorix IT Solutions</span>
