@@ -1,19 +1,7 @@
-"use client";
+﻿"use client";
 
 import React from "react";
-import dynamic from "next/dynamic";
 import { HeroContent } from "./HeroContent";
-
-// Lazy-load the Three.js R3F Canvas without blocking SSR
-const HeroCanvas = dynamic(() => import("./HeroCanvas"), {
-  ssr: false,
-  loading: () => (
-    <div
-      className="absolute inset-0 bg-gradient-to-b from-[#0B0E14] via-[#10141D] to-[#0B0E14] opacity-50"
-      aria-hidden="true"
-    />
-  ),
-});
 
 export function Hero() {
   return (
@@ -21,10 +9,12 @@ export function Hero() {
       id="hero"
       className="relative min-h-[100dvh] w-full overflow-hidden bg-bg-primary"
     >
-      {/* 3D Background Canvas */}
-      <HeroCanvas />
+      {/* Ambient background halos */}
+      <div className="pointer-events-none absolute -left-10 top-1/4 h-96 w-96 rounded-full bg-structure/10 blur-[150px]" />
+      <div className="pointer-events-none absolute right-0 top-1/4 h-[480px] w-[480px] rounded-full bg-signal/10 blur-[160px]" />
+      <div className="pointer-events-none absolute bottom-10 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full bg-purple-500/10 blur-[140px]" />
 
-      {/* Foreground Semantic Content */}
+      {/* Foreground Semantic Content with Featured 3D Console */}
       <HeroContent />
     </section>
   );

@@ -1,37 +1,63 @@
 ﻿"use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import { profileData } from "@/lib/content/profile";
 import {
   Code,
   FileText,
   Briefcase,
   GraduationCap,
-  ChartScatter,
   LinkedinLogo,
   InstagramLogo,
   XLogo,
 } from "@phosphor-icons/react";
 import { ResumeModal } from "@/components/sections/ResumeModal";
 
+// Dynamically import 3D Console without SSR
+const Hero3DConsole = dynamic(
+  () => import("./Hero3DConsole").then((mod) => mod.Hero3DConsole),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-64 w-full items-center justify-center rounded-2xl border border-line bg-bg-surface/50 font-mono text-xs text-text-muted sm:h-72 lg:h-[340px]">
+        <div className="flex items-center gap-2">
+          <span className="h-2 w-2 animate-pulse rounded-full bg-structure" />
+          <span>INITIALIZING 3D ENGINE...</span>
+        </div>
+      </div>
+    ),
+  }
+);
+
 export function HeroContent() {
   const [resumeOpen, setResumeOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+    const updateSize = () => setIsDesktop(window.innerWidth >= 1024);
+    updateSize();
+    window.addEventListener("resize", updateSize);
+    return () => window.removeEventListener("resize", updateSize);
+  }, []);
 
   return (
     <>
-      <div className="pointer-events-none relative z-20 mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col justify-between px-4 pb-8 pt-20 sm:px-6 sm:pb-10 sm:pt-28">
+      <div className="relative z-20 mx-auto flex min-h-[100dvh] w-full max-w-6xl flex-col justify-between px-4 pb-8 pt-20 sm:px-6 sm:pb-10 sm:pt-28">
         {/* Top Duality Indicator Pill */}
-        <div className="pointer-events-auto flex items-center justify-between">
+        <div className="flex items-center justify-between">
           <div className="inline-flex items-center gap-2 rounded-full border border-line bg-bg-surface/95 px-3 py-1.5 shadow-lg shadow-black/30 backdrop-blur-md sm:gap-3 sm:px-4">
             <span className="flex items-center gap-1.5 font-mono text-[10px] font-medium text-structure sm:text-xs">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-structure sm:h-2 sm:w-2" />
-              Python & Software
+              Python &amp; Software
             </span>
             <span className="text-[10px] text-text-muted sm:text-xs">⇄</span>
             <span className="flex items-center gap-1.5 font-mono text-[10px] font-medium text-signal sm:text-xs">
               <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-signal sm:h-2 sm:w-2" />
-              Data & ML
+              Data &amp; ML
             </span>
           </div>
 
@@ -43,7 +69,8 @@ export function HeroContent() {
 
         {/* Main Hero Grid */}
         <div className="my-auto grid grid-cols-1 items-center gap-6 py-4 sm:gap-8 sm:py-6 lg:grid-cols-12">
-          <div className="pointer-events-auto max-w-2xl space-y-5 sm:space-y-6 lg:col-span-7">
+          {/* Left Column: Identity, Value Prop, CTA Buttons */}
+          <div className="max-w-2xl space-y-5 sm:space-y-6 lg:col-span-7">
             {/* Photo + Identity */}
             <div className="flex flex-row items-center gap-4 sm:gap-6">
               <div className="relative h-20 w-20 shrink-0 rounded-full bg-gradient-to-tr from-structure via-purple-500 to-signal p-[3px] shadow-2xl shadow-structure/30 ring-4 ring-structure/20 sm:h-28 sm:w-28 md:h-32 md:w-32">
@@ -58,12 +85,13 @@ export function HeroContent() {
                   />
                 </div>
               </div>
+
               <div>
                 <h1 className="font-display text-2xl font-extrabold tracking-tight text-text-primary sm:text-4xl lg:text-5xl">
                   {profileData.name}
                 </h1>
                 <p className="mt-1 font-mono text-xs font-semibold text-structure sm:text-sm">
-                  Software Engineer & Data Analyst
+                  Software Engineer &amp; Data Analyst
                 </p>
                 <p className="mt-0.5 font-mono text-[11px] text-text-muted sm:text-xs">
                   Nagpur, India · IJRASET79908
@@ -71,7 +99,14 @@ export function HeroContent() {
               </div>
             </div>
 
-            {/* Value Prop */}
+            {/* Mobile-Only 3D Interactive Console (Renders directly here on mobile!) */}
+            {mounted && !isDesktop && (
+              <div className="my-2 block lg:hidden">
+                <Hero3DConsole />
+              </div>
+            )}
+
+            {/* Core Value Proposition */}
             <h2 className="font-display text-xl font-bold leading-tight tracking-tight text-text-primary drop-shadow-md sm:text-2xl lg:text-4xl">
               I turn scattered data into decisions, and decisions into software.
             </h2>
@@ -82,7 +117,7 @@ export function HeroContent() {
               Solutions, Pune.
             </p>
 
-            {/* CTA Buttons */}
+            {/* Action Buttons */}
             <div className="flex flex-wrap items-center gap-2.5 pt-1 sm:gap-3">
               <a
                 href="#projects"
@@ -97,12 +132,13 @@ export function HeroContent() {
               <button
                 type="button"
                 onClick={() => setResumeOpen(true)}
-                className="active:scale-98 inline-flex items-center gap-2 rounded-full border border-structure/40 bg-structure/15 px-4 py-3 text-sm font-medium text-structure shadow-lg shadow-structure/10 transition-all duration-300 hover:border-structure hover:bg-structure/25 sm:px-5 sm:py-3.5"
+                className="active:scale-98 group inline-flex items-center gap-2 rounded-full border border-structure/40 bg-structure/15 px-4 py-3 text-sm font-medium text-structure shadow-lg shadow-structure/10 transition-all duration-300 hover:border-structure hover:bg-structure/25 sm:px-5 sm:py-3.5"
               >
                 <FileText size={15} weight="bold" />
                 <span>View Resume</span>
               </button>
 
+              {/* Social Icons Hub */}
               <div className="flex items-center gap-2">
                 <a
                   href={profileData.links.linkedin}
@@ -135,37 +171,16 @@ export function HeroContent() {
             </div>
           </div>
 
-          {/* Right Column: 3D callout — desktop only */}
-          <div className="pointer-events-none hidden flex-col items-end justify-center lg:col-span-5 lg:flex">
-            <div className="max-w-xs space-y-2.5 rounded-2xl border border-line/80 bg-bg-surface/85 p-4 font-mono text-xs text-text-muted shadow-2xl backdrop-blur-md">
-              <div className="flex items-center justify-between text-text-primary">
-                <span className="flex items-center gap-1.5 font-medium text-signal">
-                  <ChartScatter
-                    size={16}
-                    weight="bold"
-                    className="text-signal"
-                  />
-                  <span>3D Scatter Plot (EDA)</span>
-                </span>
-                <span className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
-                  NOISE → SCATTER
-                </span>
-              </div>
-              <p className="text-[11px] leading-relaxed text-text-muted/90">
-                Particles start as raw noisy data, then assemble into an
-                interactive 3D scatter plot. Move cursor to orbit.
-              </p>
-              <div className="flex items-center justify-between border-t border-line/60 pt-2 text-[10px]">
-                <span className="text-signal">Amber: Data Signal</span>
-                <span className="text-text-muted">·</span>
-                <span className="text-structure">Indigo: Code</span>
-              </div>
+          {/* Desktop-Only 3D Column */}
+          {mounted && isDesktop && (
+            <div className="hidden lg:col-span-5 lg:block">
+              <Hero3DConsole />
             </div>
-          </div>
+          )}
         </div>
 
-        {/* Bottom Telemetry Strip — 2-col mobile, 4-col sm+ */}
-        <div className="pointer-events-auto grid grid-cols-2 gap-2 border-t border-line/60 pt-4 sm:grid-cols-4 sm:gap-3 sm:pt-6">
+        {/* Bottom Telemetry Strip */}
+        <div className="grid grid-cols-2 gap-2 border-t border-line/60 pt-4 sm:grid-cols-4 sm:gap-3 sm:pt-6">
           <div className="flex items-center gap-2 font-mono text-[10px] text-text-muted sm:text-xs">
             <Briefcase size={13} className="shrink-0 text-structure" />
             <span className="truncate">Atorix IT Solutions</span>
@@ -176,7 +191,7 @@ export function HeroContent() {
           </div>
           <div className="flex items-center gap-2 font-mono text-[10px] text-text-muted sm:text-xs">
             <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-400" />
-            <span className="truncate">VanRakshak 92%+</span>
+            <span className="truncate">VanRakshak AI 92%+</span>
           </div>
           <div className="flex items-center gap-2 font-mono text-[10px] text-text-muted sm:text-xs">
             <span className="text-text-muted/60">Paper:</span>
@@ -187,6 +202,7 @@ export function HeroContent() {
         </div>
       </div>
 
+      {/* Interactive Resume Modal */}
       <ResumeModal isOpen={resumeOpen} onClose={() => setResumeOpen(false)} />
     </>
   );
