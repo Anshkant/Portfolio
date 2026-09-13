@@ -1,44 +1,68 @@
-"use client";
+﻿"use client";
 
 import React, { useRef, useState, useEffect } from "react";
+import Image from "next/image";
 import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 import { projectsData, Project } from "@/lib/content/projects";
 import {
   GithubLogo,
   ArrowSquareOut,
-  ShieldCheck,
-  TrendUp,
-  HardDrives,
-  Pulse,
   CaretRight,
   CaretLeft,
-  Eye,
   Lightning,
-  CheckCircle,
+  Globe,
+  LockSimple,
+  ShieldCheck,
+  TrendUp,
+  Pulse,
 } from "@phosphor-icons/react";
 
 export function Projects() {
   const targetRef = useRef<HTMLDivElement>(null);
-  const [activeIndex, setActiveIndex] = useState(0);
+  const trackRef = useRef<HTMLDivElement>(null);
+  const [maxScroll, setMaxScroll] = useState<number>(2000);
+  const [activeIndex, setActiveIndex] = useState<number>(0);
 
-  // Vertical scroll tracking on the wrapper container
+  // Measure exact pixel distance required to scroll through every single project card
+  useEffect(() => {
+    const updateDimensions = () => {
+      if (trackRef.current) {
+        const scrollW = trackRef.current.scrollWidth;
+        const viewW = window.innerWidth;
+        // Total distance needed for the last card to be fully in view + end padding
+        const dist = Math.max(0, scrollW - viewW + 80);
+        setMaxScroll(dist);
+      }
+    };
+
+    updateDimensions();
+    // Allow images and fonts to settle
+    const timer = setTimeout(updateDimensions, 400);
+    window.addEventListener("resize", updateDimensions);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", updateDimensions);
+    };
+  }, []);
+
+  // Track vertical scroll on the parent section
   const { scrollYProgress } = useScroll({
     target: targetRef,
     offset: ["start start", "end end"],
   });
 
-  // Smooth physics spring for horizontal motion
+  // Butter-smooth spring easing for the horizontal glide
   const smoothProgress = useSpring(scrollYProgress, {
     stiffness: 90,
     damping: 24,
     restDelta: 0.001,
   });
 
-  // Map 0 -> 1 progress to horizontal translation percentage
-  // 5 slides -> translate from 0% to approximately -78%
-  const x = useTransform(smoothProgress, [0, 1], ["0%", "-78%"]);
+  // Dynamically map 0 -> 1 progress to the exact horizontal pixel translation
+  const x = useTransform(smoothProgress, [0, 1], [0, -maxScroll]);
 
-  // Track active slide index based on scroll position
+  // Update active slide counter based on scroll progression
   useEffect(() => {
     return scrollYProgress.on("change", (latest) => {
       const idx = Math.min(
@@ -49,7 +73,7 @@ export function Projects() {
     });
   }, [scrollYProgress]);
 
-  // Click navigation: jump to specific project slide
+  // Click navigation: jump smoothly to any project slide
   const scrollToProject = (index: number) => {
     if (!targetRef.current) return;
     const targetTop = targetRef.current.offsetTop;
@@ -63,14 +87,14 @@ export function Projects() {
     <section
       id="projects"
       ref={targetRef}
-      className="relative h-[380vh] w-full bg-bg-primary"
+      className="relative h-[400vh] w-full bg-bg-primary"
     >
-      {/* Pinned Sticky Viewport */}
-      <div className="sticky top-0 flex h-screen w-full flex-col justify-between overflow-hidden px-4 py-8 sm:px-8 sm:py-12 lg:px-12">
-        {/* Top Progress & Navigation Header */}
+      {/* Sticky Fullscreen Pinned Gallery (fits comfortably below navbar) */}
+      <div className="sticky top-0 flex h-screen w-full flex-col justify-between overflow-hidden px-4 pb-6 pt-20 sm:px-8 sm:pb-8 sm:pt-24 lg:px-12">
+        {/* 1. Header Bar: Progress Line & Controls */}
         <div className="relative z-30 mx-auto w-full max-w-7xl">
-          {/* Animated Horizontal Progress Bar */}
-          <div className="mb-4 h-1 w-full overflow-hidden rounded-full bg-bg-surface">
+          {/* Animated Progress Bar */}
+          <div className="mb-3 h-1 w-full overflow-hidden rounded-full bg-bg-surface">
             <motion.div
               style={{ scaleX: smoothProgress, transformOrigin: "left" }}
               className="h-full bg-gradient-to-r from-structure via-purple-400 to-signal"
@@ -79,17 +103,17 @@ export function Projects() {
 
           <div className="flex items-center justify-between">
             <div>
-              <div className="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-text-muted sm:text-xs">
+              <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-text-muted sm:text-xs">
                 <span className="h-2 w-2 animate-pulse rounded-full bg-structure" />
-                <span>Featured Engineering &amp; AI Works</span>
+                <span>Production Deployments &amp; Research</span>
               </div>
-              <h2 className="font-display text-2xl font-bold tracking-tight text-text-primary sm:text-3xl">
-                Horizontal Project Showcase
+              <h2 className="font-display text-xl font-bold tracking-tight text-text-primary sm:text-2xl lg:text-3xl">
+                Featured Projects Showcase
               </h2>
             </div>
 
-            {/* Slide Index Counter & Prev/Next Controls */}
-            <div className="flex items-center gap-3">
+            {/* Slide Index Counter & Click Navigation */}
+            <div className="flex items-center gap-2.5">
               <div className="rounded-full border border-line bg-bg-surface px-3 py-1 font-mono text-xs font-semibold text-text-primary">
                 0{activeIndex + 1}{" "}
                 <span className="text-text-muted">
@@ -97,12 +121,12 @@ export function Projects() {
                 </span>
               </div>
 
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => scrollToProject(Math.max(0, activeIndex - 1))}
                   disabled={activeIndex === 0}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-bg-surface text-text-muted transition-colors hover:border-line-highlight hover:text-text-primary disabled:opacity-40"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-bg-surface text-text-muted transition-colors hover:border-line-highlight hover:text-text-primary disabled:opacity-30 sm:h-9 sm:w-9"
                   aria-label="Previous project"
                 >
                   <CaretLeft size={16} weight="bold" />
@@ -115,7 +139,7 @@ export function Projects() {
                     )
                   }
                   disabled={activeIndex === projectsData.length - 1}
-                  className="flex h-9 w-9 items-center justify-center rounded-full border border-line bg-bg-surface text-text-muted transition-colors hover:border-line-highlight hover:text-text-primary disabled:opacity-40"
+                  className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-bg-surface text-text-muted transition-colors hover:border-line-highlight hover:text-text-primary disabled:opacity-30 sm:h-9 sm:w-9"
                   aria-label="Next project"
                 >
                   <CaretRight size={16} weight="bold" />
@@ -125,40 +149,36 @@ export function Projects() {
           </div>
         </div>
 
-        {/* Center: Horizontally Moving Projects Track */}
-        <div className="relative my-auto flex w-full items-center">
+        {/* 2. Center: Horizontally Moving Projects Track */}
+        <div className="relative my-auto flex w-full items-center overflow-visible">
           <motion.div
+            ref={trackRef}
             style={{ x }}
-            className="flex items-center gap-6 pl-2 sm:gap-8 sm:pl-4 lg:gap-12"
+            className="flex items-center gap-6 pl-2 sm:gap-8 sm:pl-4 lg:gap-10"
           >
             {projectsData.map((project, idx) => {
               const isFlagship = project.isFlagship;
               const isStructure = project.lean === "structure";
               const isSignal = project.lean === "signal";
-              const accentColor = isFlagship
-                ? "purple"
+              const primaryLink = project.liveUrl || project.repoUrl;
+              const isLive = Boolean(project.liveUrl);
+
+              const accentGlow = isFlagship
+                ? "border-purple-500/40 ring-1 ring-purple-500/20"
                 : isStructure
-                  ? "structure"
-                  : isSignal
-                    ? "signal"
-                    : "purple";
+                  ? "border-structure/40 ring-1 ring-structure/20"
+                  : "border-signal/40 ring-1 ring-signal/20";
 
               return (
                 <div
                   key={project.id}
-                  className={`group relative flex w-[86vw] shrink-0 flex-col justify-between overflow-hidden rounded-3xl border bg-gradient-to-b from-bg-surface/95 via-bg-surface/85 to-bg-primary/95 p-5 shadow-2xl shadow-black/70 backdrop-blur-xl transition-all duration-300 sm:w-[72vw] sm:p-8 lg:w-[62vw] lg:max-w-4xl lg:p-10 ${
-                    activeIndex === idx
-                      ? isFlagship
-                        ? "border-purple-500/50 ring-1 ring-purple-500/30"
-                        : isStructure
-                          ? "border-structure/50 ring-1 ring-structure/30"
-                          : "border-signal/50 ring-1 ring-signal/30"
-                      : "border-line"
+                  className={`group relative flex w-[88vw] shrink-0 flex-col justify-between overflow-hidden rounded-3xl border bg-gradient-to-b from-bg-surface/95 via-bg-surface/90 to-bg-primary/95 p-4 shadow-2xl shadow-black/80 backdrop-blur-xl transition-all duration-300 sm:w-[70vw] sm:p-6 lg:w-[58vw] lg:max-w-3xl lg:p-7 ${
+                    activeIndex === idx ? accentGlow : "border-line"
                   }`}
                 >
-                  {/* Glowing top hairline */}
+                  {/* Accent Hairline */}
                   <div
-                    className={`absolute left-0 right-0 top-0 h-1.5 ${
+                    className={`absolute left-0 right-0 top-0 h-1 ${
                       isFlagship
                         ? "bg-gradient-to-r from-structure via-purple-500 to-signal"
                         : isStructure
@@ -167,236 +187,169 @@ export function Projects() {
                     }`}
                   />
 
-                  {/* 1. TOP BAR: INDEX + BADGE */}
-                  <div className="mb-4 flex items-center justify-between">
-                    <div className="flex items-center gap-2 font-mono text-xs text-text-muted">
-                      <span className="font-bold text-text-primary">
-                        0{idx + 1}
-                      </span>
-                      <span>{"//"}</span>
-                      <span
-                        className={`rounded-full border px-2.5 py-0.5 text-[10px] uppercase tracking-wider ${
-                          isFlagship
-                            ? "border-purple-500/30 bg-purple-950/40 text-purple-300"
-                            : isStructure
-                              ? "border-structure/30 bg-structure/10 text-structure"
-                              : "border-signal/30 bg-signal/10 text-signal"
-                        }`}
-                      >
-                        {project.leanLabel}
-                      </span>
+                  {/* 1. TOP INFO: Index + Badge + Title + 2-Liner Description */}
+                  <div className="mb-3 sm:mb-4">
+                    <div className="mb-2 flex items-center justify-between">
+                      <div className="flex items-center gap-2 font-mono text-xs text-text-muted">
+                        <span className="font-bold text-text-primary">
+                          0{idx + 1}
+                        </span>
+                        <span>{"//"}</span>
+                        <span
+                          className={`rounded-full border px-2.5 py-0.5 text-[10px] uppercase tracking-wider ${
+                            isFlagship
+                              ? "border-purple-500/30 bg-purple-950/40 text-purple-300"
+                              : isStructure
+                                ? "border-structure/30 bg-structure/10 text-structure"
+                                : "border-signal/30 bg-signal/10 text-signal"
+                          }`}
+                        >
+                          {project.leanLabel}
+                        </span>
+                      </div>
+
+                      {isFlagship && (
+                        <span className="rounded-full border border-purple-400/30 bg-purple-500/10 px-2.5 py-0.5 font-mono text-[10px] font-medium text-purple-300 sm:text-xs">
+                          Published (IJRASET79908)
+                        </span>
+                      )}
                     </div>
 
-                    {isFlagship && (
-                      <span className="rounded-full border border-purple-400/30 bg-purple-500/10 px-3 py-1 font-mono text-[11px] font-medium text-purple-300">
-                        Published Research (IJRASET79908)
-                      </span>
-                    )}
+                    {/* Title */}
+                    <h3 className="mb-1 font-display text-xl font-extrabold tracking-tight text-white drop-shadow-sm sm:text-2xl lg:text-3xl">
+                      {project.title}
+                    </h3>
+
+                    {/* 2-Liner Concise Description */}
+                    <p className="line-clamp-2 font-body text-xs leading-relaxed text-text-muted sm:text-sm">
+                      {project.description}
+                    </p>
                   </div>
 
-                  {/* 2. PROJECT TITLE (Bold White Typography) */}
-                  <h3 className="mb-2 font-display text-2xl font-extrabold tracking-tight text-white drop-shadow-sm sm:text-3xl lg:text-4xl">
-                    {project.title}
-                  </h3>
+                  {/* 2. REAL LANDING PAGE BROWSER SHOWCASE (Clickable!) */}
+                  <a
+                    href={primaryLink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group/browser relative block overflow-hidden rounded-2xl border border-line bg-bg-primary shadow-xl transition-all duration-300 hover:border-line-highlight"
+                    title={`Click to open ${isLive ? "live site" : "repository"}`}
+                  >
+                    {/* Browser Chrome Header */}
+                    <div className="flex items-center justify-between border-b border-line bg-bg-surface/90 px-3 py-2 sm:px-4">
+                      {/* Traffic Light Window Dots */}
+                      <div className="flex items-center gap-1.5">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F56]/80" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#FFBD2E]/80" />
+                        <span className="h-2.5 w-2.5 rounded-full bg-[#27C93F]/80" />
+                      </div>
 
-                  {/* 3. CONCISE 2-LINER DESCRIPTION */}
-                  <p className="mb-5 line-clamp-2 font-body text-sm leading-relaxed text-text-muted sm:text-base">
-                    {project.description}
-                  </p>
+                      {/* Mock URL Bar */}
+                      <div className="flex max-w-[220px] items-center gap-1.5 truncate rounded-full border border-line bg-bg-primary/90 px-3 py-0.5 font-mono text-[10px] text-text-muted sm:max-w-xs sm:text-[11px]">
+                        <LockSimple size={10} className="text-emerald-400" />
+                        <span className="truncate">
+                          {project.liveUrl
+                            ? project.liveUrl.replace(/^https?:\/\//, "")
+                            : "github.com/Anshkant"}
+                        </span>
+                      </div>
 
-                  {/* 4. BESPOKE VISUAL PREVIEW / TELEMETRY CENTERPIECE */}
-                  <div className="mb-6 overflow-hidden rounded-2xl border border-line bg-bg-primary/90 p-4 font-mono text-xs sm:p-5">
-                    {project.id === "vanrakshak-ai" && (
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between border-b border-line pb-2.5">
-                          <span className="flex items-center gap-2 font-semibold text-purple-300">
-                            <ShieldCheck size={16} weight="bold" />
-                            <span>SURVEILLANCE_STREAM // CAM-04</span>
-                          </span>
-                          <span className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">
-                            LIVE 92.4% ACCURACY
-                          </span>
+                      {/* Open Badge */}
+                      <div className="flex items-center gap-1 font-mono text-[10px] text-text-muted transition-colors group-hover/browser:text-text-primary">
+                        <span className="hidden sm:inline">
+                          {isLive ? "LIVE SITE" : "GITHUB REPO"}
+                        </span>
+                        <ArrowSquareOut size={12} weight="bold" />
+                      </div>
+                    </div>
+
+                    {/* Actual Landing Page Image Frame */}
+                    <div className="relative h-44 w-full overflow-hidden sm:h-56 md:h-64 lg:h-72">
+                      {project.image ? (
+                        <div className="relative h-full w-full">
+                          <Image
+                            src={project.image}
+                            alt={`${project.title} landing page preview`}
+                            fill
+                            sizes="(max-width: 768px) 88vw, (max-width: 1200px) 70vw, 58vw"
+                            className="object-cover object-top transition-transform duration-500 ease-out group-hover/browser:scale-[1.03]"
+                            priority={idx < 2}
+                          />
+                          {/* Subtle dark vignette overlay */}
+                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg-primary/70 via-transparent to-transparent opacity-60 transition-opacity group-hover/browser:opacity-30" />
                         </div>
-                        <div className="relative flex aspect-[21/9] flex-col justify-between overflow-hidden rounded-xl border border-line/80 bg-gradient-to-br from-purple-950/20 via-bg-surface to-bg-primary p-3">
-                          <div className="relative z-10 w-fit rounded border border-purple-400/70 bg-purple-500/15 px-2 py-1">
-                            <div className="font-mono text-[10px] font-bold text-purple-200">
-                              YOLOv8: Wildlife (0.94)
+                      ) : (
+                        /* Fallback High-Tech Terminal Visual for analytical projects */
+                        <div className="flex h-full w-full flex-col justify-between bg-gradient-to-br from-bg-surface via-bg-primary to-bg-surface p-5 font-mono text-xs">
+                          <div className="flex items-center justify-between border-b border-line pb-2">
+                            <span className="flex items-center gap-2 font-semibold text-signal">
+                              {project.id === "ai-kpi-monitor" ? (
+                                <TrendUp size={16} weight="bold" />
+                              ) : (
+                                <Pulse size={16} weight="bold" />
+                              )}
+                              <span>{project.title}</span>
+                            </span>
+                            <span className="rounded border border-signal/30 bg-signal/10 px-2 py-0.5 text-[10px] text-signal">
+                              ANALYTICAL PIPELINE
+                            </span>
+                          </div>
+
+                          <div className="space-y-2 py-3 text-center">
+                            <div className="font-display text-2xl font-bold text-text-primary">
+                              {project.metrics?.[0]?.value ?? "Python + Pandas"}
                             </div>
-                            <div className="text-[9px] text-purple-400">
-                              DeepSORT Kalman #104
+                            <div className="text-xs text-text-muted">
+                              {project.metrics?.[0]?.label ??
+                                "Operational Telemetry"}
                             </div>
                           </div>
-                          <div className="relative z-10 flex items-center justify-between text-[10px] text-text-muted">
-                            <span>FPS: 30.2</span>
-                            <span>LATENCY: 14ms</span>
+
+                          <div className="flex items-center justify-between border-t border-line/60 pt-2 text-[10px] text-text-muted">
+                            <span>Repository: github.com/Anshkant</span>
                             <span className="text-emerald-400">
-                              TELEGRAM BOT &lt; 60s
+                              ● Open Source
                             </span>
                           </div>
                         </div>
-                      </div>
-                    )}
+                      )}
 
-                    {project.id === "critindia" && (
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between border-b border-line pb-2.5">
-                          <span className="flex items-center gap-2 font-semibold text-structure">
-                            <HardDrives size={16} weight="bold" />
-                            <span>NEXT.js SSR // B2B ARCHITECTURE</span>
+                      {/* Hover Overlay Hint */}
+                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover/browser:opacity-100">
+                        <span className="flex items-center gap-2 rounded-full border border-white/20 bg-bg-primary/95 px-4 py-2 font-mono text-xs font-semibold text-white shadow-2xl">
+                          <span>
+                            {isLive
+                              ? "Visit Live Deployed Site"
+                              : "View GitHub Repository"}
                           </span>
-                          <span className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">
-                            LOAD TIME &lt; 2.0s
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-3 gap-2 py-2 text-center">
-                          <div className="rounded-lg border border-line bg-bg-surface p-2">
-                            <div className="text-base font-bold text-structure">
-                              42ms
-                            </div>
-                            <div className="text-[10px] text-text-muted">
-                              TTFB Edge
-                            </div>
-                          </div>
-                          <div className="rounded-lg border border-line bg-bg-surface p-2">
-                            <div className="text-base font-bold text-emerald-400">
-                              1.1s
-                            </div>
-                            <div className="text-[10px] text-text-muted">
-                              First Paint
-                            </div>
-                          </div>
-                          <div className="rounded-lg border border-line bg-bg-surface p-2">
-                            <div className="text-base font-bold text-text-primary">
-                              1k+
-                            </div>
-                            <div className="text-[10px] text-text-muted">
-                              B2B Monthly
-                            </div>
-                          </div>
-                        </div>
+                          <ArrowSquareOut size={14} weight="bold" />
+                        </span>
                       </div>
-                    )}
+                    </div>
+                  </a>
 
-                    {project.id === "connecting-dots-erp" && (
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between border-b border-line pb-2.5">
-                          <span className="flex items-center gap-2 font-semibold text-structure">
-                            <HardDrives size={16} weight="bold" />
-                            <span>ERP_WORKFLOW // DATABASE LAYER</span>
-                          </span>
-                          <span className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-0.5 text-[10px] text-emerald-400">
-                            -35% QUERY LATENCY
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 py-2">
-                          <div className="rounded-lg border border-line bg-bg-surface p-2.5">
-                            <div className="text-sm font-bold text-structure">
-                              5,000+ Visits
-                            </div>
-                            <div className="text-[10px] text-text-muted">
-                              Monthly Student Traffic
-                            </div>
-                          </div>
-                          <div className="rounded-lg border border-line bg-bg-surface p-2.5">
-                            <div className="text-sm font-bold text-emerald-400">
-                              Compound Index
-                            </div>
-                            <div className="text-[10px] text-text-muted">
-                              MongoDB Optimization
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {project.id === "ai-kpi-monitor" && (
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between border-b border-line pb-2.5">
-                          <span className="flex items-center gap-2 font-semibold text-signal">
-                            <TrendUp size={16} weight="bold" />
-                            <span>TELEMETRY_PIPELINE // STATISTICAL EDA</span>
-                          </span>
-                          <span className="rounded border border-signal/30 bg-signal/10 px-2 py-0.5 text-[10px] text-signal">
-                            ANOMALY ENGINE
-                          </span>
-                        </div>
-                        <div className="flex items-center justify-between rounded-lg border border-line bg-bg-surface p-3 text-[11px]">
-                          <div>
-                            <span className="block text-text-muted">
-                              Variance Detection:
-                            </span>
-                            <span className="font-bold text-signal">
-                              3-Sigma Threshold
-                            </span>
-                          </div>
-                          <div className="text-right">
-                            <span className="block text-text-muted">
-                              Processing Engine:
-                            </span>
-                            <span className="font-bold text-text-primary">
-                              Python Pandas
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-
-                    {project.id === "patient-readmission-analysis" && (
-                      <div className="space-y-3">
-                        <div className="flex items-center justify-between border-b border-line pb-2.5">
-                          <span className="flex items-center gap-2 font-semibold text-signal">
-                            <Pulse size={16} weight="bold" />
-                            <span>HEALTHCARE_ML // RISK STRATIFICATION</span>
-                          </span>
-                          <span className="rounded border border-signal/30 bg-signal/10 px-2 py-0.5 text-[10px] text-signal">
-                            CLINICAL EDA
-                          </span>
-                        </div>
-                        <div className="grid grid-cols-2 gap-2 py-2">
-                          <div className="rounded-lg border border-line bg-bg-surface p-2.5">
-                            <div className="text-sm font-bold text-signal">
-                              ROC-AUC 0.81
-                            </div>
-                            <div className="text-[10px] text-text-muted">
-                              Predictive Metric
-                            </div>
-                          </div>
-                          <div className="rounded-lg border border-line bg-bg-surface p-2.5">
-                            <div className="text-sm font-bold text-text-primary">
-                              Feature Importance
-                            </div>
-                            <div className="text-[10px] text-text-muted">
-                              Preventable Readmissions
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* 5. TECH BADGES + ACTION BUTTONS (REPO + LIVE DEMO) */}
-                  <div className="flex flex-wrap items-center justify-between gap-4 border-t border-line/80 pt-5">
-                    {/* Tech Pills */}
-                    <div className="flex flex-wrap gap-1.5 sm:gap-2">
+                  {/* 3. BOTTOM ROW: TECH PILLS + DIRECT ACTION BUTTONS */}
+                  <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3 border-t border-line/70 pt-3">
+                    {/* Tech Badges */}
+                    <div className="flex flex-wrap gap-1.5">
                       {project.technologies.slice(0, 4).map((tech) => (
                         <span
                           key={tech}
-                          className="rounded-lg border border-line bg-bg-primary px-2.5 py-1 font-mono text-[11px] text-text-muted"
+                          className="rounded-md border border-line bg-bg-primary px-2 py-0.5 font-mono text-[10px] text-text-muted sm:text-[11px]"
                         >
                           {tech}
                         </span>
                       ))}
                     </div>
 
-                    {/* Action Hub (Live Demo + Repo) */}
-                    <div className="flex flex-wrap items-center gap-2.5">
-                      {/* Live Demo Link (Deployment) */}
+                    {/* Action Links */}
+                    <div className="flex items-center gap-2">
+                      {/* Live Deployment Demo Link */}
                       {project.liveUrl && (
                         <a
                           href={project.liveUrl}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-mono text-xs font-semibold shadow-lg transition-all duration-200 active:scale-95 ${
+                          className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-mono text-xs font-semibold shadow-md transition-all duration-200 active:scale-95 ${
                             isFlagship
                               ? "bg-purple-500 text-white shadow-purple-500/25 hover:bg-purple-600"
                               : isStructure
@@ -404,8 +357,9 @@ export function Projects() {
                                 : "bg-signal text-bg-primary shadow-signal/25 hover:opacity-90"
                           }`}
                         >
-                          <ArrowSquareOut size={15} weight="bold" />
-                          <span>Live Demo</span>
+                          <Globe size={14} weight="bold" />
+                          <span>Live Site</span>
+                          <ArrowSquareOut size={12} weight="bold" />
                         </a>
                       )}
 
@@ -414,9 +368,9 @@ export function Projects() {
                         href={project.repoUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 rounded-full border border-line bg-bg-primary px-4 py-2 font-mono text-xs font-medium text-text-primary transition-colors duration-200 hover:border-line-highlight hover:bg-bg-elevated active:scale-95"
+                        className="inline-flex items-center gap-1.5 rounded-full border border-line bg-bg-primary px-3.5 py-1.5 font-mono text-xs font-medium text-text-primary transition-colors duration-200 hover:border-line-highlight hover:bg-bg-elevated active:scale-95"
                       >
-                        <GithubLogo size={15} weight="bold" />
+                        <GithubLogo size={14} weight="bold" />
                         <span>Repository</span>
                       </a>
                     </div>
@@ -427,10 +381,10 @@ export function Projects() {
           </motion.div>
         </div>
 
-        {/* Bottom Pagination Dots & Scroll Guidance */}
-        <div className="relative z-30 mx-auto flex w-full max-w-7xl items-center justify-between border-t border-line/60 pt-4 font-mono text-xs text-text-muted">
+        {/* 3. Bottom Pagination Dots & Scroll Guidance */}
+        <div className="relative z-30 mx-auto flex w-full max-w-7xl items-center justify-between border-t border-line/60 pt-3 font-mono text-[11px] text-text-muted sm:text-xs">
           <div className="flex items-center gap-2">
-            <span className="hidden sm:inline">SELECT PROJECT:</span>
+            <span className="hidden sm:inline">QUICK JUMP:</span>
             <div className="flex items-center gap-1.5">
               {projectsData.map((_, i) => (
                 <button
@@ -448,9 +402,12 @@ export function Projects() {
             </div>
           </div>
 
-          <div className="flex items-center gap-1.5 text-[11px] text-text-muted">
+          <div className="flex items-center gap-1.5 text-text-muted">
             <Lightning size={14} className="text-signal" />
-            <span>SCROLL VERTICALLY TO ADVANCE HORIZONTALLY</span>
+            <span className="hidden sm:inline">
+              SCROLL VERTICALLY TO ADVANCE ALL PROJECTS HORIZONTALLY
+            </span>
+            <span className="sm:hidden">SCROLL OR DRAG TO ADVANCE</span>
           </div>
         </div>
       </div>

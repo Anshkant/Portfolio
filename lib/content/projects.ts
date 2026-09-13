@@ -1,4 +1,4 @@
-export interface Project {
+﻿export interface Project {
   id: string;
   title: string;
   tagline: string;
@@ -10,6 +10,7 @@ export interface Project {
   technologies: string[];
   repoUrl: string;
   liveUrl?: string;
+  image?: string;
   isFlagship?: boolean;
   publication?: string;
   metrics?: Array<{
@@ -26,7 +27,7 @@ export const projectsData: Project[] = [
     tagline:
       "Wildlife Sanctuary Monitoring System — Published Research (IJRASET79908)",
     description:
-      "End-to-end AI pipeline achieving 92%+ detection accuracy on live surveillance feeds, cutting human-animal conflict response time to under 60 seconds via automated Telegram alerts.",
+      "AI-powered multi-camera surveillance pipeline achieving 92%+ detection accuracy on live streams with sub-60s automated Telegram emergency alerts.",
     longDescription:
       "Engineered as a mission-critical AI system for environmental surveillance. VanRakshak AI fuses deep learning object detection with real-time video stream processing and tracking across multi-camera feeds. Published in IJRASET (Paper ID: IJRASET79908).",
     lean: "bridge",
@@ -42,6 +43,7 @@ export const projectsData: Project[] = [
     ],
     repoUrl: "https://github.com/Anshkant/Vanrakshak-AI",
     liveUrl: "https://vanrakshak-ai.vercel.app/",
+    image: "/images/projects/vanrakshak.png",
     isFlagship: true,
     publication: "IJRASET79908",
     metrics: [
@@ -77,6 +79,7 @@ export const projectsData: Project[] = [
     ],
     repoUrl: "https://github.com/Anshkant",
     liveUrl: "https://critindia.com",
+    image: "/images/projects/critindia.png",
     metrics: [
       { label: "Page Load Speed", value: "< 2.0s" },
       { label: "Monthly B2B Traffic", value: "1,000+" },
@@ -102,6 +105,7 @@ export const projectsData: Project[] = [
     technologies: ["Node.js", "Express.js", "MongoDB", "REST APIs", "Auth0"],
     repoUrl: "https://github.com/Anshkant",
     liveUrl: "https://connectingdotserp.com",
+    image: "/images/projects/connectingdots.png",
     metrics: [
       { label: "Monthly Active Visits", value: "5,000+" },
       { label: "Query Optimization", value: "35% Faster" },
@@ -114,8 +118,34 @@ export const projectsData: Project[] = [
     ],
   },
   {
+    id: "atorix-it-solutions",
+    title: "Atorix IT Solutions",
+    tagline: "Corporate Portal & Enterprise SAP S/4 HANA Partner Platform",
+    description:
+      "Official corporate portal delivering robust digital solutions, SAP implementation services, and automated lead capture with modern responsive architecture.",
+    longDescription:
+      "Built and deployed during 6-month on-site internship at Atorix IT Solutions in Pune. Features responsive layouts, enterprise service catalogs, and optimized performance.",
+    lean: "structure",
+    leanLabel: "Structure (Software)",
+    accentColor: "#5C7CFA",
+    technologies: ["Next.js", "React.js", "Node.js", "MongoDB", "Tailwind CSS"],
+    repoUrl: "https://github.com/Anshkant",
+    liveUrl: "https://atorixit.com",
+    image: "/images/projects/atorix.png",
+    metrics: [
+      { label: "Company", value: "Atorix IT Solutions" },
+      { label: "Location", value: "Pune, India" },
+      { label: "Tenure", value: "6 Months On-Site" },
+    ],
+    architectureHighlights: [
+      "Interactive enterprise service catalogs and responsive client consultation funnels",
+      "High-performance frontend architecture with optimized asset delivery",
+      "Production deployment serving active business clients across enterprise verticals",
+    ],
+  },
+  {
     id: "ai-kpi-monitor",
-    title: "AI KPI Monitor",
+    title: "AI KPI Health Monitor",
     tagline:
       "Data-driven business performance analytics & automated operational insights",
     description:
