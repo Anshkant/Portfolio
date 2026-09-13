@@ -41,6 +41,7 @@ export const projectsData: Project[] = [
       "FastAPI",
     ],
     repoUrl: "https://github.com/Anshkant/Vanrakshak-AI",
+    liveUrl: "https://vanrakshak-ai.vercel.app/",
     isFlagship: true,
     publication: "IJRASET79908",
     metrics: [
