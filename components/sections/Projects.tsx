@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import React, { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
@@ -21,9 +21,6 @@ import {
   ArrowsLeftRight,
   Gauge,
   Lightning,
-  ShieldCheck,
-  TrendUp,
-  Cpu,
 } from "@phosphor-icons/react";
 
 export function Projects() {
@@ -32,11 +29,12 @@ export function Projects() {
 
   // Motion controls for continuous scroll
   const x = useMotionValue(0);
+  const currentSpeed = useRef(1.25);
   const [isPaused, setIsPaused] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [direction, setDirection] = useState<-1 | 1>(-1); // -1 = left, 1 = right
   const [speedMultiplier, setSpeedMultiplier] = useState(1);
-  const [halfWidth, setHalfWidth] = useState(2400);
+  const [halfWidth, setHalfWidth] = useState(3000);
   const [activeProject, setActiveProject] = useState<Project>(projectsData[0]!);
 
   // Measure half-width of the duplicate track for seamless continuous wrapping
@@ -63,18 +61,27 @@ export function Projects() {
   const { scrollY } = useScroll();
   const scrollVelocity = useVelocity(scrollY);
   const smoothVelocity = useSpring(scrollVelocity, {
-    damping: 50,
-    stiffness: 400,
+    damping: 40,
+    stiffness: 250,
   });
 
-  // Base motion frame loop (Continuous 60FPS fluid stream)
+  // Base motion frame loop (Smooth continuous 60/120FPS fluid stream)
   useAnimationFrame((_, delta) => {
-    // If user paused or hovered, gently stop
-    const baseSpeed = isPaused || isHovered ? 0 : 0.75 * speedMultiplier;
+    // Smooth deceleration on hover instead of jarring stop
+    const targetSpeed = isPaused
+      ? 0
+      : isHovered
+        ? 0.12
+        : 1.25 * speedMultiplier;
+
+    // Smooth lerp speed transition
+    currentSpeed.current += (targetSpeed - currentSpeed.current) * 0.12;
 
     // Additional momentum boost when user scrolls the page
-    const vel = smoothVelocity.get() * 0.0035;
-    const totalStep = (baseSpeed * direction + vel) * (delta / 16.6);
+    const vel = smoothVelocity.get() * 0.003;
+    const normalizedDelta = Math.min(delta, 32) / 16.667;
+    const totalStep =
+      (currentSpeed.current * direction + vel) * normalizedDelta;
 
     let currentX = x.get() + totalStep;
 
@@ -123,7 +130,7 @@ export function Projects() {
               <span className="h-2 w-2 animate-pulse rounded-full bg-structure" />
               <span>Continuous Interactive Stream</span>
               <span>{"//"}</span>
-              <span className="text-structure">06 Production Systems</span>
+              <span className="text-structure">07 Production Systems</span>
             </div>
             <h2 className="font-display text-3xl font-extrabold tracking-tight text-text-primary sm:text-4xl lg:text-5xl">
               Featured Work Showcase
@@ -178,13 +185,15 @@ export function Projects() {
             <button
               type="button"
               onClick={() =>
-                setSpeedMultiplier(speedMultiplier === 1 ? 1.75 : 1)
+                setSpeedMultiplier(speedMultiplier === 1 ? 1.6 : 1)
               }
               className="flex items-center gap-1.5 rounded-xl border border-line bg-bg-primary px-3 py-1.5 font-mono text-xs text-text-muted transition-colors hover:border-line-highlight hover:text-text-primary"
               title="Toggle speed"
             >
               <Gauge size={13} weight="bold" />
-              <span>{speedMultiplier === 1 ? "1x Speed" : "2x Speed"}</span>
+              <span>
+                {speedMultiplier === 1 ? "Normal Speed" : "Fast Speed (1.6x)"}
+              </span>
             </button>
           </div>
         </div>
@@ -197,7 +206,6 @@ export function Projects() {
           {projectsData.map((p, idx) => {
             const isFlagship = p.isFlagship;
             const isSignal = p.lean === "signal";
-            const isStructure = p.lean === "structure";
             const isActive = activeProject.id === p.id;
 
             const badgeColor = isFlagship
@@ -304,8 +312,14 @@ export function Projects() {
                     )}
 
                     {project.id === "customer-churn-analysis" && (
-                      <span className="rounded-full border border-signal/30 bg-signal/10 px-2.5 py-0.5 font-mono text-[10px] font-medium text-signal">
-                        XGBoost · ROC 0.89
+                      <span className="rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-0.5 font-mono text-[10px] font-medium text-emerald-400">
+                        AUC 0.998 · Live Deployed
+                      </span>
+                    )}
+
+                    {project.id === "patient-readmission-analysis" && (
+                      <span className="rounded-full border border-sky-500/30 bg-sky-500/10 px-2.5 py-0.5 font-mono text-[10px] font-medium text-sky-400">
+                        ROC-AUC 0.814 · Clinical
                       </span>
                     )}
                   </div>
@@ -385,7 +399,9 @@ export function Projects() {
                     <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover/browser:opacity-100">
                       <span className="flex items-center gap-2 rounded-full border border-white/20 bg-bg-primary/95 px-4 py-2 font-mono text-xs font-semibold text-white shadow-2xl">
                         <span>
-                          {isLive ? "Launch Live Site" : "Open GitHub Repo"}
+                          {isLive
+                            ? "Visit Live Deployed Site"
+                            : "Open GitHub Repo"}
                         </span>
                         <ArrowSquareOut size={14} weight="bold" />
                       </span>
@@ -455,7 +471,9 @@ export function Projects() {
         <div className="hidden items-center gap-3 sm:flex">
           <span>ACTIVE: {activeProject.title}</span>
           <span>·</span>
-          <span className="text-structure">6 PRODUCTION WORKS</span>
+          <span className="text-structure">
+            {projectsData.length} PRODUCTION WORKS
+          </span>
         </div>
       </div>
     </section>

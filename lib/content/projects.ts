@@ -21,7 +21,7 @@
 }
 
 export const projectsData: Project[] = [
-  // 1. AI KPI Monitor (1st as requested)
+  // 1. AI KPI Health Monitor
   {
     id: "ai-kpi-monitor",
     title: "AI KPI Health Monitor",
@@ -55,7 +55,7 @@ export const projectsData: Project[] = [
     ],
   },
 
-  // 2. VanRakshak AI (2nd as requested)
+  // 2. VanRakshak AI
   {
     id: "vanrakshak-ai",
     title: "VanRakshak AI",
@@ -95,41 +95,78 @@ export const projectsData: Project[] = [
     ],
   },
 
-  // 3. Customer Churn Analysis (3rd as requested)
+  // 3. Customer Churn Intelligence Dashboard
   {
     id: "customer-churn-analysis",
-    title: "Customer Churn & Retention Analytics",
-    tagline: "Predictive Machine Learning Modeling & Customer Retention EDA",
+    title: "Customer Churn Intelligence Dashboard",
+    tagline:
+      "E-Commerce Churn Intelligence — Predictive Risk Scoring & Retention Economics",
     description:
-      "Predictive ML pipeline identifying high-risk churn customer cohorts, calculating feature retention weights with 86%+ classification accuracy.",
+      "Enterprise predictive churn scoring platform evaluating 5,630 accounts with cross-validated Random Forest ensembles (0.998 AUC-ROC) and financial retention simulator.",
     longDescription:
-      "Engineered predictive machine learning models (XGBoost, Random Forest, Logistic Regression) and exploratory churn analysis on multi-attribute customer datasets to isolate churn risk drivers and optimize customer retention strategies.",
+      "Engineered predictive machine learning models with SHAP explainability and interactive what-if financial simulation, identifying at-risk accounts with 95.3% precision.",
     lean: "signal",
     leanLabel: "Signal (Data)",
     accentColor: "#F2B441",
     technologies: [
+      "Next.js",
+      "TypeScript",
       "Python",
-      "Pandas",
+      "Random Forest",
       "Scikit-Learn",
-      "XGBoost",
-      "Matplotlib",
-      "Seaborn",
+      "Tailwind CSS",
     ],
-    repoUrl: "https://github.com/Anshkant/Customer-Churn-Prediction",
-    image: "/images/projects/churn.svg",
+    repoUrl: "https://github.com/Anshkant/Customer-Churn-Analysis",
+    liveUrl: "https://customer-churn-dashboard-sigma.vercel.app/",
+    image: "/images/projects/churn.png",
     metrics: [
-      { label: "Classification Accuracy", value: "86.4%" },
-      { label: "Model Framework", value: "XGBoost + RF" },
-      { label: "ROC-AUC Score", value: "0.89" },
+      { label: "Model AUC-ROC", value: "0.998" },
+      { label: "Churn Precision", value: "95.3%" },
+      { label: "Campaign Net ROI", value: "432%" },
     ],
     architectureHighlights: [
-      "Supervised ML classification pipelines utilizing XGBoost and Random Forest classifiers",
-      "Feature importance attribution uncovering primary customer churn risk indicators",
-      "Actionable retention cohort segmentation driving proactive intervention efficiency",
+      "Cross-validated Random Forest ensemble achieving 0.998 AUC-ROC across 5,630 accounts",
+      "Dynamic targeted retention campaign simulator calculating ROI and net profit preservation",
+      "Real-time individual customer risk profiler and SHAP explainability telemetry",
     ],
   },
 
-  // 4. CritIndia (SAP Consulting Platform)
+  // 4. Patient Readmission & Healthcare Analysis
+  {
+    id: "patient-readmission-analysis",
+    title: "Patient Readmission & Healthcare Analysis",
+    tagline: "Clinical Intelligence & Statistical Risk Stratification",
+    description:
+      "Comprehensive healthcare analytics study isolating preventable hospital readmission risk factors, multivariate correlation matrices, and predictive modeling (0.814 ROC-AUC).",
+    longDescription:
+      "Applies exploratory clinical data analysis and statistical evaluation to hospital records to isolate key drivers of early discharge returns and mitigate clinical readmission costs.",
+    lean: "signal",
+    leanLabel: "Signal (Data)",
+    accentColor: "#38BDF8",
+    technologies: [
+      "Python",
+      "Pandas",
+      "NumPy",
+      "Scikit-Learn",
+      "EDA",
+      "Seaborn",
+    ],
+    repoUrl:
+      "https://github.com/Anshkant/Patient-Readmission-and-Healthcare-Analysis",
+    image: "/images/projects/patient-readmission.svg",
+    metrics: [
+      { label: "Predictive ROC-AUC", value: "0.814" },
+      { label: "High-Risk Flags", value: "18.2%" },
+      { label: "Methodology", value: "EDA & Stat Modeling" },
+    ],
+    architectureHighlights: [
+      "Rigorous cleaning and imputation of messy, multi-variable patient clinical data",
+      "Multivariate correlation matrices isolating primary readmission drivers",
+      "High-clarity visualizations communicating risk thresholds to healthcare leaders",
+    ],
+  },
+
+  // 5. CritIndia (SAP Consulting Platform)
   {
     id: "critindia",
     title: "CritIndia — SAP Consulting Platform",
@@ -163,7 +200,7 @@ export const projectsData: Project[] = [
     ],
   },
 
-  // 5. ConnectingDots ERP
+  // 6. ConnectingDots ERP
   {
     id: "connecting-dots-erp",
     title: "ConnectingDots ERP",
@@ -191,7 +228,7 @@ export const projectsData: Project[] = [
     ],
   },
 
-  // 6. Atorix IT Solutions
+  // 7. Atorix IT Solutions
   {
     id: "atorix-it-solutions",
     title: "Atorix IT Solutions",
