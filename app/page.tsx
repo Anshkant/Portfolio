@@ -4,7 +4,6 @@ import { About } from "@/components/sections/About";
 import { Experience } from "@/components/sections/Experience";
 import { Skills } from "@/components/sections/Skills";
 import { Projects } from "@/components/sections/Projects";
-import { Journey } from "@/components/sections/Journey";
 import { Contact } from "@/components/sections/Contact";
 
 export default function Home() {
@@ -24,9 +23,6 @@ export default function Home() {
 
       {/* Projects: Flagship VanRakshak AI + CritIndia + ConnectingDots ERP + Bento grid */}
       <Projects />
-
-      {/* Journey: Interactive 8-stage learning pipeline flow */}
-      <Journey />
 
       {/* Contact: Quiet, confident close with verified career statement */}
       <Contact />
