@@ -1,414 +1,461 @@
-﻿"use client";
+"use client";
 
-import React, { useRef, useState, useEffect } from "react";
+import React, { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { motion, useScroll, useTransform, useSpring } from "framer-motion";
+import {
+  motion,
+  useMotionValue,
+  useAnimationFrame,
+  useScroll,
+  useVelocity,
+  useSpring,
+} from "framer-motion";
 import { projectsData, Project } from "@/lib/content/projects";
 import {
   GithubLogo,
   ArrowSquareOut,
-  CaretRight,
-  CaretLeft,
-  Lightning,
   Globe,
   LockSimple,
+  Play,
+  Pause,
+  ArrowsLeftRight,
+  Gauge,
+  Lightning,
   ShieldCheck,
   TrendUp,
-  Pulse,
+  Cpu,
 } from "@phosphor-icons/react";
 
 export function Projects() {
-  const targetRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
-  const [maxScroll, setMaxScroll] = useState<number>(2000);
-  const [activeIndex, setActiveIndex] = useState<number>(0);
 
-  // Measure exact pixel distance required to scroll through every single project card
-  useEffect(() => {
-    const updateDimensions = () => {
-      if (trackRef.current) {
-        const scrollW = trackRef.current.scrollWidth;
-        const viewW = window.innerWidth;
-        // Total distance needed for the last card to be fully in view + end padding
-        const dist = Math.max(0, scrollW - viewW + 80);
-        setMaxScroll(dist);
+  // Motion controls for continuous scroll
+  const x = useMotionValue(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [direction, setDirection] = useState<-1 | 1>(-1); // -1 = left, 1 = right
+  const [speedMultiplier, setSpeedMultiplier] = useState(1);
+  const [halfWidth, setHalfWidth] = useState(2400);
+  const [activeProject, setActiveProject] = useState<Project>(projectsData[0]!);
+
+  // Measure half-width of the duplicate track for seamless continuous wrapping
+  const updateWidth = useCallback(() => {
+    if (trackRef.current) {
+      const fullWidth = trackRef.current.scrollWidth;
+      if (fullWidth > 0) {
+        setHalfWidth(fullWidth / 2);
       }
-    };
-
-    updateDimensions();
-    // Allow images and fonts to settle
-    const timer = setTimeout(updateDimensions, 400);
-    window.addEventListener("resize", updateDimensions);
-
-    return () => {
-      clearTimeout(timer);
-      window.removeEventListener("resize", updateDimensions);
-    };
+    }
   }, []);
 
-  // Track vertical scroll on the parent section
-  const { scrollYProgress } = useScroll({
-    target: targetRef,
-    offset: ["start start", "end end"],
-  });
-
-  // Butter-smooth spring easing for the horizontal glide
-  const smoothProgress = useSpring(scrollYProgress, {
-    stiffness: 90,
-    damping: 24,
-    restDelta: 0.001,
-  });
-
-  // Dynamically map 0 -> 1 progress to the exact horizontal pixel translation
-  const x = useTransform(smoothProgress, [0, 1], [0, -maxScroll]);
-
-  // Update active slide counter based on scroll progression
   useEffect(() => {
-    return scrollYProgress.on("change", (latest) => {
-      const idx = Math.min(
-        projectsData.length - 1,
-        Math.max(0, Math.floor(latest * projectsData.length))
-      );
-      setActiveIndex(idx);
-    });
-  }, [scrollYProgress]);
+    updateWidth();
+    const timer = setTimeout(updateWidth, 500);
+    window.addEventListener("resize", updateWidth);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener("resize", updateWidth);
+    };
+  }, [updateWidth]);
 
-  // Click navigation: jump smoothly to any project slide
-  const scrollToProject = (index: number) => {
-    if (!targetRef.current) return;
-    const targetTop = targetRef.current.offsetTop;
-    const targetHeight = targetRef.current.offsetHeight - window.innerHeight;
-    const targetScrollY =
-      targetTop + (index / (projectsData.length - 1)) * targetHeight;
-    window.scrollTo({ top: targetScrollY, behavior: "smooth" });
+  // Connect to page vertical scroll velocity for organic acceleration
+  const { scrollY } = useScroll();
+  const scrollVelocity = useVelocity(scrollY);
+  const smoothVelocity = useSpring(scrollVelocity, {
+    damping: 50,
+    stiffness: 400,
+  });
+
+  // Base motion frame loop (Continuous 60FPS fluid stream)
+  useAnimationFrame((_, delta) => {
+    // If user paused or hovered, gently stop
+    const baseSpeed = isPaused || isHovered ? 0 : 0.75 * speedMultiplier;
+
+    // Additional momentum boost when user scrolls the page
+    const vel = smoothVelocity.get() * 0.0035;
+    const totalStep = (baseSpeed * direction + vel) * (delta / 16.6);
+
+    let currentX = x.get() + totalStep;
+
+    // Seamless toroidal wrap around
+    if (halfWidth > 0) {
+      if (currentX < -halfWidth) {
+        currentX += halfWidth;
+      } else if (currentX > 0) {
+        currentX -= halfWidth;
+      }
+    }
+
+    x.set(currentX);
+  });
+
+  // Jump smoothly to a specific project card in the stream
+  const jumpToProject = (index: number) => {
+    if (halfWidth > 0) {
+      const cardApproxWidth = halfWidth / projectsData.length;
+      const targetX = -(index * cardApproxWidth);
+      x.set(targetX);
+      const proj = projectsData[index];
+      if (proj) setActiveProject(proj);
+    }
   };
+
+  // Duplicate data array for seamless infinite looping
+  const displayProjects = [...projectsData, ...projectsData];
 
   return (
     <section
       id="projects"
-      ref={targetRef}
-      className="relative h-[400vh] w-full bg-bg-primary"
+      ref={containerRef}
+      className="relative mx-auto w-full max-w-full overflow-hidden bg-bg-primary py-20 sm:py-28"
     >
-      {/* Sticky Fullscreen Pinned Gallery (fits comfortably below navbar) */}
-      <div className="sticky top-0 flex h-screen w-full flex-col justify-between overflow-hidden px-4 pb-6 pt-20 sm:px-8 sm:pb-8 sm:pt-24 lg:px-12">
-        {/* 1. Header Bar: Progress Line & Controls */}
-        <div className="relative z-30 mx-auto w-full max-w-7xl">
-          {/* Animated Progress Bar */}
-          <div className="mb-3 h-1 w-full overflow-hidden rounded-full bg-bg-surface">
-            <motion.div
-              style={{ scaleX: smoothProgress, transformOrigin: "left" }}
-              className="h-full bg-gradient-to-r from-structure via-purple-400 to-signal"
-            />
+      {/* Background ambient lighting */}
+      <div className="pointer-events-none absolute -left-20 top-1/3 h-96 w-96 rounded-full bg-structure/10 blur-[160px]" />
+      <div className="pointer-events-none absolute -right-20 top-1/2 h-96 w-96 rounded-full bg-signal/10 blur-[160px]" />
+
+      {/* Top Header & Interactive Controls Dock */}
+      <div className="relative z-20 mx-auto mb-8 w-full max-w-7xl px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col justify-between gap-5 sm:gap-6 md:flex-row md:items-end">
+          {/* Section Titles */}
+          <div>
+            <div className="mb-2 flex items-center gap-2 font-mono text-xs uppercase tracking-wider text-text-muted">
+              <span className="h-2 w-2 animate-pulse rounded-full bg-structure" />
+              <span>Continuous Interactive Stream</span>
+              <span>{"//"}</span>
+              <span className="text-structure">06 Production Systems</span>
+            </div>
+            <h2 className="font-display text-3xl font-extrabold tracking-tight text-text-primary sm:text-4xl lg:text-5xl">
+              Featured Work Showcase
+            </h2>
+            <p className="mt-2 max-w-2xl font-body text-sm text-text-muted sm:text-base">
+              Autonomous continuous rail of live deployments, published AI
+              surveillance, and analytical prediction systems. Hover to inspect
+              or click to launch.
+            </p>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div>
-              <div className="flex items-center gap-2 font-mono text-[10px] uppercase tracking-wider text-text-muted sm:text-xs">
-                <span className="h-2 w-2 animate-pulse rounded-full bg-structure" />
-                <span>Production Deployments &amp; Research</span>
-              </div>
-              <h2 className="font-display text-xl font-bold tracking-tight text-text-primary sm:text-2xl lg:text-3xl">
-                Featured Projects Showcase
-              </h2>
-            </div>
+          {/* Interactive Stream Controls (Play/Pause, Direction, Speed) */}
+          <div className="flex flex-wrap items-center gap-2 self-start rounded-2xl border border-line bg-bg-surface/90 p-1.5 shadow-xl backdrop-blur-md md:self-auto">
+            {/* Play/Pause */}
+            <button
+              type="button"
+              onClick={() => setIsPaused(!isPaused)}
+              className={`flex items-center gap-1.5 rounded-xl px-3 py-1.5 font-mono text-xs font-medium transition-all ${
+                isPaused
+                  ? "bg-signal font-bold text-bg-primary shadow-md shadow-signal/20"
+                  : "bg-bg-primary text-text-primary hover:text-white"
+              }`}
+              title={isPaused ? "Resume continuous scroll" : "Pause stream"}
+            >
+              {isPaused ? (
+                <>
+                  <Play size={13} weight="fill" />
+                  <span>Resume</span>
+                </>
+              ) : (
+                <>
+                  <Pause size={13} weight="fill" />
+                  <span>Pause</span>
+                </>
+              )}
+            </button>
 
-            {/* Slide Index Counter & Click Navigation */}
-            <div className="flex items-center gap-2.5">
-              <div className="rounded-full border border-line bg-bg-surface px-3 py-1 font-mono text-xs font-semibold text-text-primary">
-                0{activeIndex + 1}{" "}
-                <span className="text-text-muted">
-                  / 0{projectsData.length}
-                </span>
-              </div>
+            {/* Reverse Direction */}
+            <button
+              type="button"
+              onClick={() => setDirection(direction === -1 ? 1 : -1)}
+              className="flex items-center gap-1.5 rounded-xl border border-line bg-bg-primary px-3 py-1.5 font-mono text-xs text-text-muted transition-colors hover:border-line-highlight hover:text-text-primary"
+              title="Reverse scroll direction"
+            >
+              <ArrowsLeftRight size={13} weight="bold" />
+              <span>
+                {direction === -1 ? "Direction: L ←" : "Direction: → R"}
+              </span>
+            </button>
 
-              <div className="flex items-center gap-1">
-                <button
-                  type="button"
-                  onClick={() => scrollToProject(Math.max(0, activeIndex - 1))}
-                  disabled={activeIndex === 0}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-bg-surface text-text-muted transition-colors hover:border-line-highlight hover:text-text-primary disabled:opacity-30 sm:h-9 sm:w-9"
-                  aria-label="Previous project"
-                >
-                  <CaretLeft size={16} weight="bold" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() =>
-                    scrollToProject(
-                      Math.min(projectsData.length - 1, activeIndex + 1)
-                    )
-                  }
-                  disabled={activeIndex === projectsData.length - 1}
-                  className="flex h-8 w-8 items-center justify-center rounded-full border border-line bg-bg-surface text-text-muted transition-colors hover:border-line-highlight hover:text-text-primary disabled:opacity-30 sm:h-9 sm:w-9"
-                  aria-label="Next project"
-                >
-                  <CaretRight size={16} weight="bold" />
-                </button>
-              </div>
-            </div>
+            {/* Speed Toggle */}
+            <button
+              type="button"
+              onClick={() =>
+                setSpeedMultiplier(speedMultiplier === 1 ? 1.75 : 1)
+              }
+              className="flex items-center gap-1.5 rounded-xl border border-line bg-bg-primary px-3 py-1.5 font-mono text-xs text-text-muted transition-colors hover:border-line-highlight hover:text-text-primary"
+              title="Toggle speed"
+            >
+              <Gauge size={13} weight="bold" />
+              <span>{speedMultiplier === 1 ? "1x Speed" : "2x Speed"}</span>
+            </button>
           </div>
         </div>
 
-        {/* 2. Center: Horizontally Moving Projects Track */}
-        <div className="relative my-auto flex w-full items-center overflow-visible">
-          <motion.div
-            ref={trackRef}
-            style={{ x }}
-            className="flex items-center gap-6 pl-2 sm:gap-8 sm:pl-4 lg:gap-10"
-          >
-            {projectsData.map((project, idx) => {
-              const isFlagship = project.isFlagship;
-              const isStructure = project.lean === "structure";
-              const isSignal = project.lean === "signal";
-              const primaryLink = project.liveUrl || project.repoUrl;
-              const isLive = Boolean(project.liveUrl);
+        {/* Quick-Jump Project Navigator Bar (Interactive project switcher) */}
+        <div className="scrollbar-none mt-6 flex items-center gap-1.5 overflow-x-auto pb-1 font-mono text-xs">
+          <span className="shrink-0 pr-2 font-semibold text-text-muted">
+            QUICK JUMP:
+          </span>
+          {projectsData.map((p, idx) => {
+            const isFlagship = p.isFlagship;
+            const isSignal = p.lean === "signal";
+            const isStructure = p.lean === "structure";
+            const isActive = activeProject.id === p.id;
 
-              const accentGlow = isFlagship
-                ? "border-purple-500/40 ring-1 ring-purple-500/20"
-                : isStructure
-                  ? "border-structure/40 ring-1 ring-structure/20"
-                  : "border-signal/40 ring-1 ring-signal/20";
+            const badgeColor = isFlagship
+              ? "text-purple-300 border-purple-500/30"
+              : isSignal
+                ? "text-signal border-signal/30"
+                : "text-structure border-structure/30";
 
-              return (
+            return (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => jumpToProject(idx)}
+                className={`flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-1.5 transition-all ${
+                  isActive
+                    ? "border-text-primary bg-bg-elevated font-bold text-white shadow-md"
+                    : `bg-bg-surface/80 ${badgeColor} hover:bg-bg-elevated hover:text-white`
+                }`}
+              >
+                <span>0{idx + 1}</span>
+                <span>{p.title.split("—")[0]?.trim() ?? p.title}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* The Continuous Infinite Sliding Rail */}
+      <div
+        className="relative w-full overflow-hidden py-4"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Edge Vignette Gradients for cinematic fade */}
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-20 w-12 bg-gradient-to-r from-bg-primary to-transparent sm:w-24" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-20 w-12 bg-gradient-to-l from-bg-primary to-transparent sm:w-24" />
+
+        <motion.div
+          ref={trackRef}
+          style={{ x }}
+          className="flex cursor-grab items-center gap-6 px-4 active:cursor-grabbing sm:gap-8"
+        >
+          {displayProjects.map((project, index) => {
+            const isFlagship = project.isFlagship;
+            const isStructure = project.lean === "structure";
+            const isSignal = project.lean === "signal";
+            const primaryLink = project.liveUrl || project.repoUrl;
+            const isLive = Boolean(project.liveUrl);
+
+            const accentBorder = isFlagship
+              ? "hover:border-purple-500/60 hover:shadow-purple-500/20"
+              : isStructure
+                ? "hover:border-structure/60 hover:shadow-structure/20"
+                : "hover:border-signal/60 hover:shadow-signal/20";
+
+            const tagColor = isFlagship
+              ? "border-purple-500/30 bg-purple-950/40 text-purple-300"
+              : isStructure
+                ? "border-structure/30 bg-structure/10 text-structure"
+                : "border-signal/30 bg-signal/10 text-signal";
+
+            return (
+              <div
+                key={`${project.id}-${index}`}
+                onMouseEnter={() => setActiveProject(project)}
+                className={`group relative flex w-[86vw] shrink-0 flex-col justify-between overflow-hidden rounded-3xl border border-line bg-gradient-to-b from-bg-surface/95 via-bg-surface/85 to-bg-primary/95 p-5 shadow-2xl shadow-black/80 backdrop-blur-xl transition-all duration-300 sm:w-[500px] sm:p-6 lg:w-[560px] ${accentBorder}`}
+              >
+                {/* Accent Top Hairline */}
                 <div
-                  key={project.id}
-                  className={`group relative flex w-[88vw] shrink-0 flex-col justify-between overflow-hidden rounded-3xl border bg-gradient-to-b from-bg-surface/95 via-bg-surface/90 to-bg-primary/95 p-4 shadow-2xl shadow-black/80 backdrop-blur-xl transition-all duration-300 sm:w-[70vw] sm:p-6 lg:w-[58vw] lg:max-w-3xl lg:p-7 ${
-                    activeIndex === idx ? accentGlow : "border-line"
+                  className={`absolute left-0 right-0 top-0 h-1 ${
+                    isFlagship
+                      ? "bg-gradient-to-r from-structure via-purple-500 to-signal"
+                      : isStructure
+                        ? "bg-structure"
+                        : "bg-signal"
                   }`}
-                >
-                  {/* Accent Hairline */}
-                  <div
-                    className={`absolute left-0 right-0 top-0 h-1 ${
-                      isFlagship
-                        ? "bg-gradient-to-r from-structure via-purple-500 to-signal"
-                        : isStructure
-                          ? "bg-structure"
-                          : "bg-signal"
-                    }`}
-                  />
+                />
 
-                  {/* 1. TOP INFO: Index + Badge + Title + 2-Liner Description */}
-                  <div className="mb-3 sm:mb-4">
-                    <div className="mb-2 flex items-center justify-between">
-                      <div className="flex items-center gap-2 font-mono text-xs text-text-muted">
-                        <span className="font-bold text-text-primary">
-                          0{idx + 1}
-                        </span>
-                        <span>{"//"}</span>
-                        <span
-                          className={`rounded-full border px-2.5 py-0.5 text-[10px] uppercase tracking-wider ${
-                            isFlagship
-                              ? "border-purple-500/30 bg-purple-950/40 text-purple-300"
-                              : isStructure
-                                ? "border-structure/30 bg-structure/10 text-structure"
-                                : "border-signal/30 bg-signal/10 text-signal"
-                          }`}
-                        >
-                          {project.leanLabel}
-                        </span>
-                      </div>
-
-                      {isFlagship && (
-                        <span className="rounded-full border border-purple-400/30 bg-purple-500/10 px-2.5 py-0.5 font-mono text-[10px] font-medium text-purple-300 sm:text-xs">
-                          Published (IJRASET79908)
-                        </span>
-                      )}
+                {/* 1. Header Row: Index + Lean Badge + Publication */}
+                <div className="mb-3">
+                  <div className="mb-2 flex items-center justify-between">
+                    <div className="flex items-center gap-2 font-mono text-xs text-text-muted">
+                      <span className="font-bold text-text-primary">
+                        0{(index % projectsData.length) + 1}
+                      </span>
+                      <span>{"//"}</span>
+                      <span
+                        className={`rounded-full border px-2.5 py-0.5 text-[10px] uppercase tracking-wider ${tagColor}`}
+                      >
+                        {project.leanLabel}
+                      </span>
                     </div>
 
-                    {/* Title */}
-                    <h3 className="mb-1 font-display text-xl font-extrabold tracking-tight text-white drop-shadow-sm sm:text-2xl lg:text-3xl">
-                      {project.title}
-                    </h3>
+                    {isFlagship && (
+                      <span className="rounded-full border border-purple-400/30 bg-purple-500/10 px-2.5 py-0.5 font-mono text-[10px] font-medium text-purple-300">
+                        IJRASET79908
+                      </span>
+                    )}
 
-                    {/* 2-Liner Concise Description */}
-                    <p className="line-clamp-2 font-body text-xs leading-relaxed text-text-muted sm:text-sm">
-                      {project.description}
-                    </p>
+                    {project.id === "ai-kpi-monitor" && (
+                      <span className="rounded-full border border-signal/30 bg-signal/10 px-2.5 py-0.5 font-mono text-[10px] font-medium text-signal">
+                        Real-Time Telemetry
+                      </span>
+                    )}
+
+                    {project.id === "customer-churn-analysis" && (
+                      <span className="rounded-full border border-signal/30 bg-signal/10 px-2.5 py-0.5 font-mono text-[10px] font-medium text-signal">
+                        XGBoost · ROC 0.89
+                      </span>
+                    )}
                   </div>
 
-                  {/* 2. REAL LANDING PAGE BROWSER SHOWCASE (Clickable!) */}
-                  <a
-                    href={primaryLink}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group/browser relative block overflow-hidden rounded-2xl border border-line bg-bg-primary shadow-xl transition-all duration-300 hover:border-line-highlight"
-                    title={`Click to open ${isLive ? "live site" : "repository"}`}
-                  >
-                    {/* Browser Chrome Header */}
-                    <div className="flex items-center justify-between border-b border-line bg-bg-surface/90 px-3 py-2 sm:px-4">
-                      {/* Traffic Light Window Dots */}
-                      <div className="flex items-center gap-1.5">
-                        <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F56]/80" />
-                        <span className="h-2.5 w-2.5 rounded-full bg-[#FFBD2E]/80" />
-                        <span className="h-2.5 w-2.5 rounded-full bg-[#27C93F]/80" />
-                      </div>
+                  {/* Project Name (Bold White Typography) */}
+                  <h3 className="mb-1 font-display text-xl font-extrabold tracking-tight text-white drop-shadow-sm sm:text-2xl">
+                    {project.title}
+                  </h3>
 
-                      {/* Mock URL Bar */}
-                      <div className="flex max-w-[220px] items-center gap-1.5 truncate rounded-full border border-line bg-bg-primary/90 px-3 py-0.5 font-mono text-[10px] text-text-muted sm:max-w-xs sm:text-[11px]">
-                        <LockSimple size={10} className="text-emerald-400" />
-                        <span className="truncate">
-                          {project.liveUrl
-                            ? project.liveUrl.replace(/^https?:\/\//, "")
-                            : "github.com/Anshkant"}
-                        </span>
-                      </div>
+                  {/* Concise 2-Liner Description */}
+                  <p className="line-clamp-2 font-body text-xs leading-relaxed text-text-muted sm:text-sm">
+                    {project.description}
+                  </p>
+                </div>
 
-                      {/* Open Badge */}
-                      <div className="flex items-center gap-1 font-mono text-[10px] text-text-muted transition-colors group-hover/browser:text-text-primary">
-                        <span className="hidden sm:inline">
-                          {isLive ? "LIVE SITE" : "GITHUB REPO"}
-                        </span>
-                        <ArrowSquareOut size={12} weight="bold" />
-                      </div>
+                {/* 2. Real Browser Landing Page Preview (Directly Clickable) */}
+                <a
+                  href={primaryLink}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group/browser relative block overflow-hidden rounded-2xl border border-line bg-bg-primary shadow-xl transition-all duration-300 hover:border-line-highlight"
+                  title={`Launch ${project.title} (${isLive ? "Live Site" : "GitHub Repo"})`}
+                >
+                  {/* Browser Chrome Bar */}
+                  <div className="flex items-center justify-between border-b border-line bg-bg-surface/90 px-3 py-2 sm:px-3.5">
+                    {/* Traffic Dots */}
+                    <div className="flex items-center gap-1.5">
+                      <span className="h-2.5 w-2.5 rounded-full bg-[#FF5F56]/80" />
+                      <span className="h-2.5 w-2.5 rounded-full bg-[#FFBD2E]/80" />
+                      <span className="h-2.5 w-2.5 rounded-full bg-[#27C93F]/80" />
                     </div>
 
-                    {/* Actual Landing Page Image Frame */}
-                    <div className="relative h-44 w-full overflow-hidden sm:h-56 md:h-64 lg:h-72">
-                      {project.image ? (
-                        <div className="relative h-full w-full">
-                          <Image
-                            src={project.image}
-                            alt={`${project.title} landing page preview`}
-                            fill
-                            sizes="(max-width: 768px) 88vw, (max-width: 1200px) 70vw, 58vw"
-                            className="object-cover object-top transition-transform duration-500 ease-out group-hover/browser:scale-[1.03]"
-                            priority={idx < 2}
-                          />
-                          {/* Subtle dark vignette overlay */}
-                          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg-primary/70 via-transparent to-transparent opacity-60 transition-opacity group-hover/browser:opacity-30" />
-                        </div>
-                      ) : (
-                        /* Fallback High-Tech Terminal Visual for analytical projects */
-                        <div className="flex h-full w-full flex-col justify-between bg-gradient-to-br from-bg-surface via-bg-primary to-bg-surface p-5 font-mono text-xs">
-                          <div className="flex items-center justify-between border-b border-line pb-2">
-                            <span className="flex items-center gap-2 font-semibold text-signal">
-                              {project.id === "ai-kpi-monitor" ? (
-                                <TrendUp size={16} weight="bold" />
-                              ) : (
-                                <Pulse size={16} weight="bold" />
-                              )}
-                              <span>{project.title}</span>
-                            </span>
-                            <span className="rounded border border-signal/30 bg-signal/10 px-2 py-0.5 text-[10px] text-signal">
-                              ANALYTICAL PIPELINE
-                            </span>
-                          </div>
+                    {/* URL Address Mockup */}
+                    <div className="flex max-w-[200px] items-center gap-1.5 truncate rounded-full border border-line bg-bg-primary/90 px-2.5 py-0.5 font-mono text-[10px] text-text-muted sm:max-w-xs">
+                      <LockSimple
+                        size={10}
+                        className="shrink-0 text-emerald-400"
+                      />
+                      <span className="truncate">
+                        {project.liveUrl
+                          ? project.liveUrl.replace(/^https?:\/\//, "")
+                          : `github.com/Anshkant/${project.id}`}
+                      </span>
+                    </div>
 
-                          <div className="space-y-2 py-3 text-center">
-                            <div className="font-display text-2xl font-bold text-text-primary">
-                              {project.metrics?.[0]?.value ?? "Python + Pandas"}
-                            </div>
-                            <div className="text-xs text-text-muted">
-                              {project.metrics?.[0]?.label ??
-                                "Operational Telemetry"}
-                            </div>
-                          </div>
+                    {/* Action Pill */}
+                    <div className="flex items-center gap-1 font-mono text-[10px] text-text-muted transition-colors group-hover/browser:text-text-primary">
+                      <span className="hidden sm:inline">
+                        {isLive ? "LIVE" : "REPO"}
+                      </span>
+                      <ArrowSquareOut size={12} weight="bold" />
+                    </div>
+                  </div>
 
-                          <div className="flex items-center justify-between border-t border-line/60 pt-2 text-[10px] text-text-muted">
-                            <span>Repository: github.com/Anshkant</span>
-                            <span className="text-emerald-400">
-                              ● Open Source
-                            </span>
-                          </div>
-                        </div>
-                      )}
-
-                      {/* Hover Overlay Hint */}
-                      <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover/browser:opacity-100">
-                        <span className="flex items-center gap-2 rounded-full border border-white/20 bg-bg-primary/95 px-4 py-2 font-mono text-xs font-semibold text-white shadow-2xl">
-                          <span>
-                            {isLive
-                              ? "Visit Live Deployed Site"
-                              : "View GitHub Repository"}
-                          </span>
-                          <ArrowSquareOut size={14} weight="bold" />
-                        </span>
+                  {/* Landing Page Image Frame */}
+                  <div className="relative h-44 w-full overflow-hidden bg-bg-surface sm:h-52 lg:h-60">
+                    {project.image ? (
+                      <div className="relative h-full w-full">
+                        <Image
+                          src={project.image}
+                          alt={`${project.title} landing page preview`}
+                          fill
+                          sizes="(max-width: 768px) 86vw, 560px"
+                          className="object-cover object-top transition-transform duration-500 ease-out group-hover/browser:scale-[1.03]"
+                          priority={index < 3}
+                        />
+                        {/* Soft Vignette Overlay */}
+                        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-bg-primary/60 via-transparent to-transparent opacity-50 transition-opacity group-hover/browser:opacity-20" />
                       </div>
-                    </div>
-                  </a>
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center p-6 text-center font-mono text-xs text-text-muted">
+                        <span>Preview Loaded</span>
+                      </div>
+                    )}
 
-                  {/* 3. BOTTOM ROW: TECH PILLS + DIRECT ACTION BUTTONS */}
-                  <div className="mt-3.5 flex flex-wrap items-center justify-between gap-3 border-t border-line/70 pt-3">
-                    {/* Tech Badges */}
-                    <div className="flex flex-wrap gap-1.5">
-                      {project.technologies.slice(0, 4).map((tech) => (
-                        <span
-                          key={tech}
-                          className="rounded-md border border-line bg-bg-primary px-2 py-0.5 font-mono text-[10px] text-text-muted sm:text-[11px]"
-                        >
-                          {tech}
+                    {/* Floating Launch Pill on Hover */}
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/40 opacity-0 backdrop-blur-[2px] transition-opacity duration-300 group-hover/browser:opacity-100">
+                      <span className="flex items-center gap-2 rounded-full border border-white/20 bg-bg-primary/95 px-4 py-2 font-mono text-xs font-semibold text-white shadow-2xl">
+                        <span>
+                          {isLive ? "Launch Live Site" : "Open GitHub Repo"}
                         </span>
-                      ))}
+                        <ArrowSquareOut size={14} weight="bold" />
+                      </span>
                     </div>
+                  </div>
+                </a>
 
-                    {/* Action Links */}
-                    <div className="flex items-center gap-2">
-                      {/* Live Deployment Demo Link */}
-                      {project.liveUrl && (
-                        <a
-                          href={project.liveUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-1.5 font-mono text-xs font-semibold shadow-md transition-all duration-200 active:scale-95 ${
-                            isFlagship
-                              ? "bg-purple-500 text-white shadow-purple-500/25 hover:bg-purple-600"
-                              : isStructure
-                                ? "bg-structure text-white shadow-structure/25 hover:opacity-90"
-                                : "bg-signal text-bg-primary shadow-signal/25 hover:opacity-90"
-                          }`}
-                        >
-                          <Globe size={14} weight="bold" />
-                          <span>Live Site</span>
-                          <ArrowSquareOut size={12} weight="bold" />
-                        </a>
-                      )}
+                {/* 3. Bottom Row: Technologies & Direct Buttons */}
+                <div className="mt-4 flex flex-wrap items-center justify-between gap-3 border-t border-line/70 pt-3">
+                  {/* Tech Pills */}
+                  <div className="flex flex-wrap gap-1.5">
+                    {project.technologies.slice(0, 3).map((tech) => (
+                      <span
+                        key={tech}
+                        className="rounded-md border border-line bg-bg-primary px-2 py-0.5 font-mono text-[10px] text-text-muted sm:text-[11px]"
+                      >
+                        {tech}
+                      </span>
+                    ))}
+                  </div>
 
-                      {/* GitHub Repository Link */}
+                  {/* Action Hub */}
+                  <div className="flex items-center gap-2">
+                    {project.liveUrl && (
                       <a
-                        href={project.repoUrl}
+                        href={project.liveUrl}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 rounded-full border border-line bg-bg-primary px-3.5 py-1.5 font-mono text-xs font-medium text-text-primary transition-colors duration-200 hover:border-line-highlight hover:bg-bg-elevated active:scale-95"
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-xs font-semibold shadow-md transition-all active:scale-95 ${
+                          isFlagship
+                            ? "bg-purple-500 text-white shadow-purple-500/25 hover:bg-purple-600"
+                            : isStructure
+                              ? "bg-structure text-white shadow-structure/25 hover:opacity-90"
+                              : "bg-signal text-bg-primary shadow-signal/25 hover:opacity-90"
+                        }`}
                       >
-                        <GithubLogo size={14} weight="bold" />
-                        <span>Repository</span>
+                        <Globe size={13} weight="bold" />
+                        <span>Live Site</span>
+                        <ArrowSquareOut size={11} weight="bold" />
                       </a>
-                    </div>
+                    )}
+
+                    <a
+                      href={project.repoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1.5 rounded-full border border-line bg-bg-primary px-3 py-1 font-mono text-xs font-medium text-text-primary transition-colors hover:border-line-highlight hover:bg-bg-elevated active:scale-95"
+                    >
+                      <GithubLogo size={13} weight="bold" />
+                      <span>Code</span>
+                    </a>
                   </div>
                 </div>
-              );
-            })}
-          </motion.div>
+              </div>
+            );
+          })}
+        </motion.div>
+      </div>
+
+      {/* Bottom Guidance & Active Telemetry Strip */}
+      <div className="relative z-20 mx-auto mt-6 flex w-full max-w-7xl items-center justify-between px-4 font-mono text-[11px] text-text-muted sm:px-6 lg:px-8">
+        <div className="flex items-center gap-2">
+          <Lightning size={14} className="text-signal" />
+          <span>DRAG HORIZONTALLY TO SCRUB STREAM // HOVER TO INSPECT</span>
         </div>
 
-        {/* 3. Bottom Pagination Dots & Scroll Guidance */}
-        <div className="relative z-30 mx-auto flex w-full max-w-7xl items-center justify-between border-t border-line/60 pt-3 font-mono text-[11px] text-text-muted sm:text-xs">
-          <div className="flex items-center gap-2">
-            <span className="hidden sm:inline">QUICK JUMP:</span>
-            <div className="flex items-center gap-1.5">
-              {projectsData.map((_, i) => (
-                <button
-                  key={i}
-                  type="button"
-                  onClick={() => scrollToProject(i)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
-                    activeIndex === i
-                      ? "w-8 bg-structure"
-                      : "w-2 bg-line hover:bg-text-muted"
-                  }`}
-                  aria-label={`Jump to project ${i + 1}`}
-                />
-              ))}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-text-muted">
-            <Lightning size={14} className="text-signal" />
-            <span className="hidden sm:inline">
-              SCROLL VERTICALLY TO ADVANCE ALL PROJECTS HORIZONTALLY
-            </span>
-            <span className="sm:hidden">SCROLL OR DRAG TO ADVANCE</span>
-          </div>
+        <div className="hidden items-center gap-3 sm:flex">
+          <span>ACTIVE: {activeProject.title}</span>
+          <span>·</span>
+          <span className="text-structure">6 PRODUCTION WORKS</span>
         </div>
       </div>
     </section>

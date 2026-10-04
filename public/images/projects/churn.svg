@@ -1,0 +1,114 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 675" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0E121A"/>
+      <stop offset="50%" stop-color="#141924"/>
+      <stop offset="100%" stop-color="#0B0E14"/>
+    </linearGradient>
+    <linearGradient id="barGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#F2B441"/>
+      <stop offset="100%" stop-color="#FFD166"/>
+    </linearGradient>
+    <linearGradient id="barGrad2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#5C7CFA"/>
+      <stop offset="100%" stop-color="#7B96FF"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="675" fill="url(#bgGrad2)"/>
+  <rect width="1200" height="675" fill="none" stroke="#232838" stroke-width="2"/>
+
+  <!-- Top Nav Bar -->
+  <rect x="0" y="0" width="1200" height="60" fill="#121622" stroke="#232838" stroke-width="1"/>
+  <circle cx="35" cy="30" r="6" fill="#F2B441"/>
+  <text x="52" y="36" fill="#EDEFF4" font-family="'Space Grotesk', system-ui, sans-serif" font-weight="700" font-size="17" letter-spacing="1.5">CUSTOMER CHURN &amp; RETENTION INTELLIGENCE</text>
+  
+  <rect x="910" y="16" width="130" height="28" rx="14" fill="rgba(242,180,65,0.12)" stroke="rgba(242,180,65,0.3)" stroke-width="1"/>
+  <circle cx="928" cy="30" r="4" fill="#F2B441"/>
+  <text x="940" y="35" fill="#F2B441" font-family="monospace" font-size="12" font-weight="600">XGBOOST · RF</text>
+
+  <rect x="1055" y="16" width="110" height="28" rx="14" fill="#1A202E" stroke="#2D3448" stroke-width="1"/>
+  <text x="1070" y="35" fill="#27C93F" font-family="monospace" font-size="12">ROC-AUC 0.89</text>
+
+  <!-- Metric Cards Row -->
+  <!-- Card 1 -->
+  <rect x="40" y="85" width="260" height="120" rx="12" fill="#151A26" stroke="#262D3D" stroke-width="1"/>
+  <text x="65" y="120" fill="#8A90A0" font-family="monospace" font-size="12" letter-spacing="1">OVERALL RETENTION</text>
+  <text x="65" y="165" fill="#27C93F" font-family="'Space Grotesk', sans-serif" font-size="34" font-weight="700">86.4%</text>
+  <text x="195" y="165" fill="#8A90A0" font-family="monospace" font-size="12">PREDICTED</text>
+
+  <!-- Card 2 -->
+  <rect x="330" y="85" width="260" height="120" rx="12" fill="#151A26" stroke="#262D3D" stroke-width="1"/>
+  <text x="355" y="120" fill="#8A90A0" font-family="monospace" font-size="12" letter-spacing="1">HIGH-RISK CHURN POOL</text>
+  <text x="355" y="165" fill="#FF5F56" font-family="'Space Grotesk', sans-serif" font-size="34" font-weight="700">13.6%</text>
+  <text x="495" y="165" fill="#FF5F56" font-family="monospace" font-size="12">COHORT</text>
+
+  <!-- Card 3 -->
+  <rect x="620" y="85" width="260" height="120" rx="12" fill="#151A26" stroke="#262D3D" stroke-width="1"/>
+  <text x="645" y="120" fill="#8A90A0" font-family="monospace" font-size="12" letter-spacing="1">MODEL ACCURACY</text>
+  <text x="645" y="165" fill="#F2B441" font-family="'Space Grotesk', sans-serif" font-size="34" font-weight="700">88.2%</text>
+  <text x="780" y="165" fill="#F2B441" font-family="monospace" font-size="12">TEST SET</text>
+
+  <!-- Card 4 -->
+  <rect x="910" y="85" width="250" height="120" rx="12" fill="#151A26" stroke="#262D3D" stroke-width="1"/>
+  <text x="935" y="120" fill="#8A90A0" font-family="monospace" font-size="12" letter-spacing="1">RETENTION UPSIDE</text>
+  <text x="935" y="165" fill="#5C7CFA" font-family="'Space Grotesk', sans-serif" font-size="34" font-weight="700">$240K</text>
+  <text x="1070" y="165" fill="#5C7CFA" font-family="monospace" font-size="12">ANNUAL</text>
+
+  <!-- Feature Importance Section -->
+  <rect x="40" y="230" width="700" height="395" rx="14" fill="#131824" stroke="#242B3C" stroke-width="1"/>
+  <text x="70" y="270" fill="#EDEFF4" font-family="'Space Grotesk', sans-serif" font-size="18" font-weight="700">Predictive Feature Importance &amp; Churn Drivers</text>
+  <text x="70" y="292" fill="#8A90A0" font-family="monospace" font-size="11">SHAPLEY VALUE ATTRIBUTION ACROSS 24 CUSTOMER ATTRIBUTES</text>
+
+  <!-- Bar 1 -->
+  <text x="70" y="340" fill="#EDEFF4" font-family="monospace" font-size="12">Month-to-Month Contract Type</text>
+  <rect x="310" y="325" width="380" height="18" rx="9" fill="#1D2433"/>
+  <rect x="310" y="325" width="330" height="18" rx="9" fill="url(#barGrad)"/>
+  <text x="655" y="339" fill="#F2B441" font-family="monospace" font-size="12" font-weight="bold">0.36</text>
+
+  <!-- Bar 2 -->
+  <text x="70" y="390" fill="#EDEFF4" font-family="monospace" font-size="12">Customer Tenure (&lt; 12 Mo)</text>
+  <rect x="310" y="375" width="380" height="18" rx="9" fill="#1D2433"/>
+  <rect x="310" y="375" width="260" height="18" rx="9" fill="url(#barGrad)"/>
+  <text x="585" y="389" fill="#F2B441" font-family="monospace" font-size="12" font-weight="bold">0.27</text>
+
+  <!-- Bar 3 -->
+  <text x="70" y="440" fill="#EDEFF4" font-family="monospace" font-size="12">Total Monthly Service Charges</text>
+  <rect x="310" y="425" width="380" height="18" rx="9" fill="#1D2433"/>
+  <rect x="310" y="425" width="180" height="18" rx="9" fill="url(#barGrad2)"/>
+  <text x="505" y="439" fill="#5C7CFA" font-family="monospace" font-size="12" font-weight="bold">0.19</text>
+
+  <!-- Bar 4 -->
+  <text x="70" y="490" fill="#EDEFF4" font-family="monospace" font-size="12">Tech Support Ticket Volume</text>
+  <rect x="310" y="475" width="380" height="18" rx="9" fill="#1D2433"/>
+  <rect x="310" y="475" width="130" height="18" rx="9" fill="url(#barGrad2)"/>
+  <text x="455" y="489" fill="#5C7CFA" font-family="monospace" font-size="12" font-weight="bold">0.14</text>
+
+  <!-- Bar 5 -->
+  <text x="70" y="540" fill="#EDEFF4" font-family="monospace" font-size="12">Fiber Optic Internet Tier</text>
+  <rect x="310" y="525" width="380" height="18" rx="9" fill="#1D2433"/>
+  <rect x="310" y="525" width="85" height="18" rx="9" fill="#8A90A0"/>
+  <text x="410" y="539" fill="#8A90A0" font-family="monospace" font-size="12" font-weight="bold">0.09</text>
+
+  <!-- Risk Breakdown Donut Area -->
+  <rect x="765" y="230" width="395" height="395" rx="14" fill="#131824" stroke="#242B3C" stroke-width="1"/>
+  <text x="795" y="270" fill="#EDEFF4" font-family="'Space Grotesk', sans-serif" font-size="18" font-weight="700">Cohort Risk Classification</text>
+  <text x="795" y="292" fill="#8A90A0" font-family="monospace" font-size="11">CUSTOMER RETENTION SEGMENTS</text>
+
+  <!-- Segments Info -->
+  <circle cx="850" cy="350" r="8" fill="#27C93F"/>
+  <text x="870" y="355" fill="#EDEFF4" font-family="monospace" font-size="13" font-weight="bold">Safe Cohort (Tenure &gt; 2 Yrs)</text>
+  <text x="870" y="375" fill="#8A90A0" font-family="system-ui" font-size="11">Low churn probability &lt; 5% · 68.2% total pool</text>
+
+  <circle cx="850" cy="420" r="8" fill="#F2B441"/>
+  <text x="870" y="425" fill="#EDEFF4" font-family="monospace" font-size="13" font-weight="bold">Moderate Risk (High Monthly Fee)</text>
+  <text x="870" y="445" fill="#8A90A0" font-family="system-ui" font-size="11">Probability 25-45% · Targeted discount eligibility</text>
+
+  <circle cx="850" cy="490" r="8" fill="#FF5F56"/>
+  <text x="870" y="495" fill="#EDEFF4" font-family="monospace" font-size="13" font-weight="bold">Critical Churn Risk (Month-to-Month)</text>
+  <text x="870" y="515" fill="#8A90A0" font-family="system-ui" font-size="11">Immediate retention outreach trigger &gt; 70% risk</text>
+
+  <rect x="795" y="555" width="335" height="40" rx="8" fill="#1A2130" stroke="#283246" stroke-width="1"/>
+  <text x="815" y="580" fill="#EDEFF4" font-family="monospace" font-size="11">PROACTIVE INTERVENTION EFFICIENCY: <tspan fill="#27C93F" font-weight="bold">+41%</tspan></text>
+</svg>

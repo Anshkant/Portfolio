@@ -21,6 +21,41 @@
 }
 
 export const projectsData: Project[] = [
+  // 1. AI KPI Monitor (1st as requested)
+  {
+    id: "ai-kpi-monitor",
+    title: "AI KPI Health Monitor",
+    tagline: "Real-Time Operational Telemetry & Statistical Anomaly Detection",
+    description:
+      "Automated business performance monitoring pipeline with real-time operational metrics, 3-sigma anomaly detection, and automated variance alert feeds.",
+    longDescription:
+      "Translates complex corporate data streams into actionable operational intelligence. Runs automated data extraction, statistical trend analysis, and live KPI dashboards with sub-second alert triggers.",
+    lean: "signal",
+    leanLabel: "Signal (Data)",
+    accentColor: "#F2B441",
+    technologies: [
+      "Python",
+      "Pandas",
+      "NumPy",
+      "Time-Series",
+      "FastAPI",
+      "EDA",
+    ],
+    repoUrl: "https://github.com/Anshkant/AI-KPI-Monitor",
+    image: "/images/projects/ai-kpi.svg",
+    metrics: [
+      { label: "Anomaly Engine", value: "3-Sigma Threshold" },
+      { label: "Telemetry Feed", value: "Real-Time Stream" },
+      { label: "Core Processing", value: "Python + Pandas" },
+    ],
+    architectureHighlights: [
+      "Automated extraction and aggregation of operational KPI time-series metrics",
+      "Statistical threshold monitoring for immediate variance anomaly detection",
+      "Intuitive visualization layers designed for fast executive decision-making",
+    ],
+  },
+
+  // 2. VanRakshak AI (2nd as requested)
   {
     id: "vanrakshak-ai",
     title: "VanRakshak AI",
@@ -59,6 +94,42 @@ export const projectsData: Project[] = [
       "Multi-camera video ingestion pipeline with asynchronous frame buffering",
     ],
   },
+
+  // 3. Customer Churn Analysis (3rd as requested)
+  {
+    id: "customer-churn-analysis",
+    title: "Customer Churn & Retention Analytics",
+    tagline: "Predictive Machine Learning Modeling & Customer Retention EDA",
+    description:
+      "Predictive ML pipeline identifying high-risk churn customer cohorts, calculating feature retention weights with 86%+ classification accuracy.",
+    longDescription:
+      "Engineered predictive machine learning models (XGBoost, Random Forest, Logistic Regression) and exploratory churn analysis on multi-attribute customer datasets to isolate churn risk drivers and optimize customer retention strategies.",
+    lean: "signal",
+    leanLabel: "Signal (Data)",
+    accentColor: "#F2B441",
+    technologies: [
+      "Python",
+      "Pandas",
+      "Scikit-Learn",
+      "XGBoost",
+      "Matplotlib",
+      "Seaborn",
+    ],
+    repoUrl: "https://github.com/Anshkant/Customer-Churn-Prediction",
+    image: "/images/projects/churn.svg",
+    metrics: [
+      { label: "Classification Accuracy", value: "86.4%" },
+      { label: "Model Framework", value: "XGBoost + RF" },
+      { label: "ROC-AUC Score", value: "0.89" },
+    ],
+    architectureHighlights: [
+      "Supervised ML classification pipelines utilizing XGBoost and Random Forest classifiers",
+      "Feature importance attribution uncovering primary customer churn risk indicators",
+      "Actionable retention cohort segmentation driving proactive intervention efficiency",
+    ],
+  },
+
+  // 4. CritIndia (SAP Consulting Platform)
   {
     id: "critindia",
     title: "CritIndia — SAP Consulting Platform",
@@ -91,6 +162,8 @@ export const projectsData: Project[] = [
       "Enterprise lead generation flows and client portal touchpoints",
     ],
   },
+
+  // 5. ConnectingDots ERP
   {
     id: "connecting-dots-erp",
     title: "ConnectingDots ERP",
@@ -117,6 +190,8 @@ export const projectsData: Project[] = [
       "Robust RESTful endpoints serving high student traffic across course verticals",
     ],
   },
+
+  // 6. Atorix IT Solutions
   {
     id: "atorix-it-solutions",
     title: "Atorix IT Solutions",
@@ -141,70 +216,6 @@ export const projectsData: Project[] = [
       "Interactive enterprise service catalogs and responsive client consultation funnels",
       "High-performance frontend architecture with optimized asset delivery",
       "Production deployment serving active business clients across enterprise verticals",
-    ],
-  },
-  {
-    id: "ai-kpi-monitor",
-    title: "AI KPI Health Monitor",
-    tagline:
-      "Data-driven business performance analytics & automated operational insights",
-    description:
-      "Data-driven KPI monitoring application for tracking business performance with real-time operational metrics, trend detection, and anomaly alerts.",
-    longDescription:
-      "Translates complex corporate data streams into actionable operational intelligence. AI KPI Monitor runs automated data extraction, statistical trend analysis, and live KPI dashboards.",
-    lean: "signal",
-    leanLabel: "Signal (Data)",
-    accentColor: "#F2B441",
-    technologies: [
-      "Python",
-      "Pandas",
-      "Data Analytics",
-      "Dashboards",
-      "REST APIs",
-    ],
-    repoUrl: "https://github.com/Anshkant/AI-KPI-Monitor",
-    metrics: [
-      { label: "Core Metric Tracking", value: "Real-Time" },
-      { label: "Analysis Engine", value: "Python + Pandas" },
-      { label: "Data Integration", value: "REST API Feed" },
-    ],
-    architectureHighlights: [
-      "Automated extraction and aggregation of operational KPI time-series metrics",
-      "Statistical threshold monitoring for immediate variance anomaly detection",
-      "Intuitive visualization layers designed for fast executive decision-making",
-    ],
-  },
-  {
-    id: "patient-readmission-analysis",
-    title: "Patient Readmission & Healthcare Analysis",
-    tagline:
-      "Exploratory clinical analytics and predictive pattern identification",
-    description:
-      "Comprehensive data analytics study uncovering critical clinical patterns, patient demographics, and risk factors that correlate with hospital readmissions.",
-    longDescription:
-      "Applies exploratory data analysis and statistical evaluation to complex healthcare records to identify high-risk patient segments and reduce preventable hospital returns.",
-    lean: "signal",
-    leanLabel: "Signal (Data)",
-    accentColor: "#F2B441",
-    technologies: [
-      "Python",
-      "Pandas",
-      "NumPy",
-      "Data Visualization",
-      "EDA",
-      "Seaborn",
-    ],
-    repoUrl:
-      "https://github.com/Anshkant/Patient-Readmission-and-Healthcare-Analysis",
-    metrics: [
-      { label: "Analytical Domain", value: "Healthcare / Clinical" },
-      { label: "Core Methodology", value: "EDA & Stat Modeling" },
-      { label: "Key Outcome", value: "Risk Correlation Matrix" },
-    ],
-    architectureHighlights: [
-      "Rigorous cleaning and imputation of messy, multi-variable patient clinical data",
-      "Multivariate correlation matrices isolating primary readmission drivers",
-      "High-clarity visualizations communicating risk thresholds to healthcare leaders",
     ],
   },
 ];
